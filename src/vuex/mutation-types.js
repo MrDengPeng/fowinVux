@@ -1,1 +1,1 @@
-export const HEAD_TOP = 'HEAD_TOP'
+export const TITLE = 'TITLE'

@@ -28,6 +28,7 @@ let webpackConfig = {
     alias: {
       'vue$': 'vue/dist/vue.esm.js',
       '@': resolve('src'),
+      'static': resolve('static')
     }
   },
   module: {
@@ -82,5 +83,8 @@ let webpackConfig = {
 
 
 module.exports = vuxLoader.merge(webpackConfig, {
-  plugins: ['vux-ui', 'progress-bar', 'duplicate-style']
+  plugins: ['vux-ui', 'progress-bar', 'duplicate-style', {
+  	name: 'less-theme',
+  	path: path.resolve(__dirname, '../src/theme.less')
+  }]
 })

@@ -115,10 +115,10 @@ router.beforeEach(function (to, from, next) {
 router.afterEach(function (to) {
   isPush = false
   store.commit('updateLoadingStatus', {isLoading: false})
-  if (process.env.NODE_ENV === 'production') {
-    ga && ga('set', 'page', to.fullPath)
-    ga && ga('send', 'pageview')
-  }
+//if (process.env.NODE_ENV === 'production') {
+//  ga && ga('set', 'page', to.fullPath)
+//  ga && ga('send', 'pageview')
+//}
 })
 
 /* eslint-disable no-new */
