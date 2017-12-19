@@ -6,7 +6,7 @@
 		</div>
 		<div class="g-userinfo-item">
 			<div class="left">
-				<div class="g-avatar"><img src="../../dist/static/img/img1.4ae8f01.png"/></div>
+				<div class="g-avatar"><img src="../assets/images/img1.png"/></div>
 				<div class="info">
 					<div class="name">李妍妍</div>
 				</div>
@@ -17,7 +17,7 @@
 		</div>
 		<div class="g-userinfo-item vux-1px-t">
 			<div class="left">
-				<div class="g-avatar"><img src="../../dist/static/img/img1.4ae8f01.png"/></div>
+				<div class="g-avatar"><img src="../assets/images/img1.png"/></div>
 				<div class="info">
 					<div class="name">李妍妍</div>
 				</div>
@@ -28,7 +28,7 @@
 		</div>
 		<div class="g-userinfo-item vux-1px-t">
 			<div class="left">
-				<div class="g-avatar"><img src="../../dist/static/img/img1.4ae8f01.png"/></div>
+				<div class="g-avatar"><img src="../assets/images/img1.png"/></div>
 				<div class="info">
 					<div class="name">李妍妍</div>
 				</div>

@@ -20,7 +20,7 @@
         	<transition        	
 	        @after-enter="$vux.bus && $vux.bus.$emit('vux:after-view-enter')"
 	        :name="viewTransition" :css="!!direction">
-	        				<keep-alive include="TradingSkill,CollegeList">
+	        				<keep-alive include="TradingSkill,CollegeList,TradingDetail">
 					        	<router-view class="router-view"></router-view>					        	
 					        </keep-alive>
 	        </transition>

@@ -6,6 +6,7 @@ import router from './router'
 import store from './vuex'
 import { sync } from 'vuex-router-sync'
 import App from './App'
+import qs from 'qs'
 
 require('amfe-flexible')
 //require('./assets/js/rem')
@@ -15,7 +16,6 @@ FastClick.attach(document.body)
 Vue.config.productionTip = false
 
 import { DatetimePlugin, CloseDialogsPlugin, ConfigPlugin, BusPlugin, LocalePlugin, DevicePlugin, ToastPlugin, AlertPlugin, ConfirmPlugin, LoadingPlugin, WechatPlugin, AjaxPlugin, AppPlugin } from 'vux'
-
 
 store.registerModule('vux', {
   state: {
@@ -59,6 +59,26 @@ Vue.use(AjaxPlugin)
 Vue.use(BusPlugin)
 Vue.use(DatetimePlugin)
 Vue.use(CloseDialogsPlugin, router)
+
+/*设置请求config*/
+//Vue.http.defaults.baseURL = 'http://1s83h19629.51mypc.cn/Fowin/api/app/'
+Vue.http.defaults.baseURL = 'http://192.168.0.50:8080/Fowin/'
+Vue.http.defaults.timeout = 5000
+Vue.http.defaults.transformRequest = [ (data) => {
+	console.log(data);
+	return qs.stringify(data)
+} ]
+Vue.http.defaults.transformResponse = [function (data) {
+    console.log(JSON.parse(data)); 
+    return JSON.parse(data);
+}]
+Vue.filter('splitdate', function(time){
+	time = time.trim();
+	if(time.length >= 19){
+		return time.substring(0, time.length-3)		
+	}
+	return time
+})
 
 // simple history management
 const history = window.sessionStorage
@@ -122,8 +142,9 @@ router.afterEach(function (to) {
 })
 
 /* eslint-disable no-new */
-new Vue({
+var vueInstance = new Vue({
   router,
   store,
   render: h => h(App)
-}).$mount('#app-box')
+}).$mount('#app-box');
+

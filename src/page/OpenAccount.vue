@@ -30,7 +30,7 @@
 			<div class="photo-box">
 				<div>
 					<div class="photo-item ident one">
-						<img src="../../dist/static/img/img1.4ae8f01.png"/>
+						<img src="../assets/images/img1.png"/>
 						<div class="camera"></div>
 					</div>
 					<p class="p1">身份证正面</p>
@@ -52,7 +52,7 @@
 				</div>
 				<div>
 					<div class="photo-item">
-						<img src="../../dist/static/img/img1.4ae8f01.png"/>
+						<img src="../assets/images/img1.png"/>
 						<div class="camera"></div>
 					</div>
 				</div>

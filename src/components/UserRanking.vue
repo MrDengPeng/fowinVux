@@ -1,7 +1,7 @@
 <template>
 	<div class="team-wrap">
 		<div class="team-box g-boxshadow">
-			<div class="g-avatar"><img src="../../dist/static/img/img1.4ae8f01.png"/></div>
+			<div class="g-avatar"><img src="../assets/images/img1.png"/></div>
 			<div class="team-info">
 				<div class="item">
 					<div>20</div>

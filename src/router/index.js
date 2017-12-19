@@ -42,21 +42,24 @@ const routes = [
 	  component: (resolve) => { require(['@/page/CreateTeam'], resolve) }
 	},
 	{
-	  path: '/teaching',
-	  component: (resolve) => { require(['@/page/TeachingVideo'], resolve) }
+	  path: '/teach',
+	  component: (resolve) => { require(['@/page/VideoTeach'], resolve) }
 	},
 	{
 	  path: '/skill',
 	  name: 'skill',
-	  component: (resolve) => { require(['@/page/TradingSkill'], resolve) },
-	  meta: {
-	  	cache: true
-	  }
+	  component: (resolve) => { require(['@/page/TradingSkill'], resolve) }
 	},
 	{
-	  path: '/skill/detail',
+	  path: '/skill/detail/:id',
 	  name: 'TradingDetail',
-	  component: (resolve) => { require(['@/page/TradingDetail'], resolve) }
+	  component: (resolve) => { require(['@/page/TradingDetail'], resolve) },
+	  props: true
+	},
+	{
+	  path: '/skill',
+	  name: 'skill',
+	  component: (resolve) => { require(['@/page/TradingSkill'], resolve) }
 	},
 	{
 	  path: '/account/:type',

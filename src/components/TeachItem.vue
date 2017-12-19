@@ -1,18 +1,23 @@
 <template>
 	<div class="box vux-1px-b">
-		<div class="img"><img src="../assets/images/img2.png"/></div>
+		<div class="img"><img class="img-center" src="../assets/images/img2.png"/></div>
 		<div class="content">
-			<div class="tit white-space">XXXXXXX课程</div>
-			<div class="s-label active">中级</div>
-			<div class="num">863次播放</div>
+			<div class="tit white-space">{{data.videoName}}</div>
+			<div class="s-label active">{{data.level}}</div>
+			<div class="num">{{data.frequency}}次播放</div>
 		</div>
-		<div class="label"></div>
+		<div v-if="data.boutique == 'Y'" class="label"></div>
 	</div>
 </template>
 
 <script>
 	export default {
-		
+		data(){
+			return {
+				
+			}
+		},
+		props: ['data']
 	}
 </script>
 
@@ -28,16 +33,7 @@
 		width: 300px;
 		height: 200px;
 		overflow: hidden;
-		border-radius: 10px;
-	}
-	.img img{
-		display: block;
-		position: relative;
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%);
-		width: 100%;
-		min-height: 100%;
+		border-radius: 6px;
 	}
 	.content{
 		padding-left: 30px;

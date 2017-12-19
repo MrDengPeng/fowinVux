@@ -3,7 +3,7 @@
 		<div class="g-round-btn">我要<br />分享</div>
 		<div class="ban-chunk">
 			<div class="ban">
-				<img src="../../dist/static/img/img1.4ae8f01.png" class="img-center"/>
+				<img src="../assets/images/img1.png" class="img-center"/>
 				<span class="label active">进行中</span>
 				<div class="num">参赛人数：200人</div>
 			</div>
@@ -87,7 +87,7 @@
 			<div class="topthree-chunk">
 				<div class="topthree-item vux-1px-b">
 					<div class="img one">
-						<div class="box"><img class="img-center" src="../../dist/static/img/img1.4ae8f01.png"/></div>
+						<div class="box"><img class="img-center" src="../assets/images/img1.png"/></div>
 					</div>
 					<div class="info">
 						<div class="name">李妍妍</div>
@@ -97,7 +97,7 @@
 				</div>
 				<div class="topthree-item vux-1px-b">
 					<div class="img two">
-						<div class="box"><img class="img-center" src="../../dist/static/img/img1.4ae8f01.png"/></div>
+						<div class="box"><img class="img-center" src="../assets/images/img1.png"/></div>
 					</div>
 					<div class="info">
 						<div class="name">李妍妍</div>
@@ -107,7 +107,7 @@
 				</div>
 				<div class="topthree-item">
 					<div class="img three">
-						<div class="box"><img class="img-center" src="../../dist/static/img/img1.4ae8f01.png"/></div>
+						<div class="box"><img class="img-center" src="../assets/images/img1.png"/></div>
 					</div>
 					<div class="info">
 						<div class="name">李妍妍</div>

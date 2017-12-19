@@ -1,37 +1,37 @@
 <template>
-	<div>
+	<div style="background-color: #fff;">
 		<view-box ref="viewBox">
 			<div class="search-reset">
-				<search ref="search" :auto-fixed="false" v-model="skillName" @on-submit="onsubmit" @on-cancel="oncancel"></search>
-				<div class="list vux-1px-b" v-for="item in data" @click="routeTo(item.id)">
-					<div class="img"><img class="img-center" src="../assets/images/img1.png"/></div>
-					<div class="cont">
-						<div class="tit">{{item.content}}</div>
-						<div class="time">{{item.createTime | splitdate}}</div>
-					</div>
-				</div>
+				<search ref="search" :auto-fixed="false" v-model="videoName" @on-submit="onsubmit" @on-cancel="oncancel"></search>
+				<teach-item v-for="item in data" :data="item" :key="item.id" />
 				<div style="padding: 1px;">
 					<load-more :show-loading="more" :tip="more ? '正在加载' : '我是有底线的'" background-color="#f6f6f6"></load-more>
 				</div>
 			</div>
-		</view-box>		
+		</view-box>	
 	</div>
 </template>
 
 <script>
 	import { Search, LoadMore, ViewBox } from 'vux'
+	import TeachItem from '@/components/TeachItem'
 	import { mapMutations } from 'vuex'
 	export default {
-		name: 'TradingSkill',
 		data () {
 			return {
-				skillName: '',
-				params: { page: 1, rows: 10, skillName: ''},
+				videoName: '',
+				params: { page: 1, rows: 8, videoName: ''},
 				scrollBody: null,
 				data: [],
 				more: true,
 				scrollTop: 0,
 			}
+		},
+		components: {
+			Search,
+			LoadMore,
+			ViewBox,
+			TeachItem
 		},
 		activated(){
 			this.$refs.viewBox.scrollTo(this.scrollTop);
@@ -41,11 +41,6 @@
 		  	this.scrollTop = this.$refs.viewBox.getScrollTop();
 		  	console.log(this.$refs.viewBox.getScrollTop())
 		},
-		components: {
-			Search,
-			LoadMore,
-			ViewBox,
-		},
 		mounted () {
 			this.scrollBody = this.$refs.viewBox.getScrollBody();
 			this.getData();			
@@ -54,7 +49,7 @@
 			...mapMutations(['TITLE']),
 			getData () {
 				this.scrollBody.removeEventListener('scroll', this.scrollBottom);
-				this.$http.post('api/app/skill/findForPage.v1', this.params).then(
+				this.$http.post('api/app/video/findForPage.v1', this.params).then(
 					res => {
 						this.$vux.loading.hide();
 						let rows = res.data.data.rows;
@@ -64,7 +59,7 @@
 						}else{
 							this.data = this.data.concat(rows);
 						}
-						if(rows.length < 10){
+						if(rows.length < this.params.rows){
 							this.more = false;
 						}else{
 							this.more = true;
@@ -82,9 +77,9 @@
 			},
 			onsubmit(){
 				
-				if(this.skillName.trim() != ''){
+				if(this.videoName.trim() != ''){
 					this.$refs.search.setBlur();
-					this.params.skillName = this.skillName.trim();
+					this.params.videoName = this.videoName.trim();
 					this.params.page = 1;
 					this.$vux.loading.show({
 						text: '加载中'
@@ -96,15 +91,15 @@
 				
 			},
 			oncancel(){
-				if(this.params.skillName != ''){
-					this.params.skillName = '';
+				if(this.params.videoName != ''){
+					this.params.videoName = '';
 					this.params.page = 1;
 					this.$vux.loading.show({
 						text: '加载中'
 					});
 					this.getData();
 				}
-				this.skillName = '';
+				this.videoName = '';
 				
 			},
 			onscroll(){
@@ -124,36 +119,6 @@
 		}
 	}
 </script>
-<style scoped>
-	
-	.list{
-		background-color: #fff;
-		padding: 20px;
-		display: flex;
-	}
-	.list .img{
-		flex-shrink: 0;
-		width: 240px;
-		height: 180px;
-		overflow: hidden;
-		border-radius: 6px;
-	}
-	.list .cont{
-		display: flex;
-		padding: 20px;
-		padding-right: 0;
-		flex-direction: column;
-		justify-content: space-between;
-	}
-	.list .tit{
-		color: #333;
-		font-size: 30px;
-		display: -webkit-box;
-		-webkit-box-orient: vertical;
-		-webkit-line-clamp: 2;
-		overflow: hidden;
-	}
-	.list .time{
-		font-size: 24px;
-	}
+
+<style>
 </style>
