@@ -12,38 +12,55 @@ const routes = [
 	  redirect: '/college'
 	},
 	{
+	  path: '/new',
+	  name: 'new',
+	  component: (resolve) => { require(['@/page/NewFile'], resolve) }
+	},
+	{
 	  path: '/college',
 	  name: 'CollegeList',
 	  component: (resolve) => { require(['@/page/CollegeList'], resolve) }
 	},
 	{
-	  path: '/college/detail',
+	  path: '/college/detail/:id',
 	  name: 'CollegeDetail',
-	  component: (resolve) => { require(['@/page/CollegeDetail'], resolve) }
+	  component: (resolve) => { require(['@/page/CollegeDetail'], resolve) },
+	  props: (route) => ({id: route.params.id, type: route.query.type})
 	},
 	{
-	  path: '/ranking',
+	  path: '/ranking/:rankType',
 	  name: 'RankingAll',
-	  component: (resolve) => { require(['@/page/RankingAll'], resolve) }
+	  component: (resolve) => { require(['@/page/RankingAll'], resolve) },
+	  props: true
 	},
 	{
-	  path: '/team',
+	  path: '/team/:matchId/:teamId',
 	  name: 'MyTeam',
-	  component: (resolve) => { require(['@/page/MyTeam'], resolve) }
+	  component: (resolve) => { require(['@/page/MyTeam'], resolve) },
+	  props: true
 	},
 	{
-	  path: '/teamlist',
+	  path: '/teamlist/:id',
 	  name: 'TeamList',
-	  component: (resolve) => { require(['@/page/TeamList'], resolve) }
+	  component: (resolve) => { require(['@/page/TeamList'], resolve) },
+	  props: true
 	},
 	{
-	  path: '/createteam',
+	  path: '/createteam/:id',
 	  name: 'CreateTeam',
-	  component: (resolve) => { require(['@/page/CreateTeam'], resolve) }
+	  component: (resolve) => { require(['@/page/CreateTeam'], resolve) },
+	  props: true
 	},
 	{
 	  path: '/teach',
+	  name: 'VideoTeach',
 	  component: (resolve) => { require(['@/page/VideoTeach'], resolve) }
+	},
+	{
+	  path: '/teach/detail/:id',
+	  name: 'VideoDetail',
+	  component: (resolve) => { require(['@/page/VideoDetail'], resolve) },
+	  props: true
 	},
 	{
 	  path: '/skill',
@@ -55,11 +72,6 @@ const routes = [
 	  name: 'TradingDetail',
 	  component: (resolve) => { require(['@/page/TradingDetail'], resolve) },
 	  props: true
-	},
-	{
-	  path: '/skill',
-	  name: 'skill',
-	  component: (resolve) => { require(['@/page/TradingSkill'], resolve) }
 	},
 	{
 	  path: '/account/:type',
@@ -75,6 +87,7 @@ const routes = [
 ]
 
 export default new Router({
+
   routes
 })
 

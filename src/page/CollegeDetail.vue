@@ -1,28 +1,102 @@
 <template>
 	<div>
-		<div class="g-round-btn">我要<br />分享</div>
+		<div class="g-round-btn" v-if="sharebtn_C" v-html="sharebtn_C" @click="enrollShare_M"></div>
+		
 		<div class="ban-chunk">
 			<div class="ban">
-				<img src="../assets/images/img1.png" class="img-center"/>
-				<span class="label active">进行中</span>
-				<div class="num">参赛人数：200人</div>
+				<img :src="data.coverUrl" class="img-center"/>
+				<span class="label" :class="{active: data.matchState!='GameOver'}">{{matchState_C}}</span>
+				<div class="num">参赛人数：{{data.joinNum}}人</div>
 			</div>
-			<div class="tit">湘潭大学第一届境外金融交易大赛</div>
-			<p class="time">赛事时间：2017-12-01~2017-12-10</p>
-			<p class="time"><span class="icon-time"></span>报名截止日期：12-23</p>
+			<div class="tit">{{data.matchName}}</div>
+			<p class="time">赛事时间：{{data.startTime | splitdate(10)}}<span v-if="data.endTime"> ~ {{data.endTime | splitdate(10)}}</span></p>
+			<p class="time" v-if="data.matchState=='Enrolling'"><span class="icon-time"></span>报名截止日期：{{data.enrollTime | splitdate(10)}}</p>
 		</div>
-		<div class="margin-bg">
+		<div class="enrol-chunk margin-bg" v-if="enrollProg_C">
 			<div class="top-head vux-1px-b">
-				<div class="left"><span class="icon i-cur"></span>当季榜单</div>
-				<div class="right"><span class="more">查看更多</span></div>					
+				<div class="left"><span class="icon i-progress"></span>报名进度</div>
+				<div class="right" v-if="data.myEnrollState=='NeedTeam'"><span class="more" @click="toCreateTeam_M(data.id)">立即建组</span></div>					
+			</div>
+			<div class="content">
+				<!--报名进度-->
+				<step-box :isTeam="data.isTeam" :myEnrollState="data.myEnrollState" />
+				<p class="tip" v-if="data.isTeam=='Y'">提示：本次比赛中允许个人参赛，“组建小组”不是必要步骤。</p>
+			</div>
+		</div>
+		
+		<div class="margin-bg" v-if="data.myEnrollState=='EnrollSuccess' && data.isTeam=='N'">
+			<div class="top-head vux-1px-b">
+				<div class="left"><span class="icon i-me"></span>我的排名</div>
+				<div class="right"></div>					
+			</div>			
+			<user-ranking :data="{myNetworth:data.myNetworth,myProfit:data.myProfit,myRanking:data.myRanking,myAvatar:data.myAvatar}" :isTeam="data.isTeam" style="margin-top: 15px;padding-bottom: 15px;" />
+		</div>
+		
+		<div class="margin-bg" v-if="data.matchState=='InGame'&&data.weekRankList.length">
+			<div class="top-head vux-1px-b">
+				<div class="left"><span class="icon i-cur"></span>周赛榜单</div>
+				<div class="right"><span class="more" @click="toRanking_M(data.weekRankId,'week')">查看更多</span></div>					
 			</div>
 			
-			<user-ranking style="margin-top: 15px;" />
-			<top-three style="padding-top: 15px; padding-bottom: 15px;" />
+			<user-ranking v-if="data.isTeam=='Y'" :data="{myNetworth:data.myNetworth,myProfit:data.myProfit,myRanking:data.myRanking,myAvatar:data.myAvatar}" :isTeam="data.isTeam" style="margin-top: 15px;" />
 			
-			<table-fowin />
+			<top-three :topThree="data.weekRankList" style="padding-top: 15px; padding-bottom: 15px;" />
+			
+			<table-fowin class="parent" :rankList="data.weekRankList" :page="1" />
 		</div>
-		<div class="margin-bg">
+		
+		<div class="margin-bg" v-if="data.isAlways=='Y'&&data.seasonRankList">
+			<div class="top-head vux-1px-b">
+				<div class="left"><span class="icon i-cur"></span>季赛榜单</div>
+				<div class="right"><span class="more" @click="toRanking_M(data.seasonRankId,'season')">查看更多</span></div>					
+			</div>
+			
+			<user-ranking v-if="data.isTeam=='Y'" :data="{myNetworth:data.myNetworth,myProfit:data.myProfit,myRanking:data.myRanking,myAvatar:data.myAvatar}" :isTeam="data.isTeam" style="margin-top: 15px;" />
+			
+			<top-three :topThree="data.seasonRankList" style="padding-top: 15px; padding-bottom: 15px;" />
+			
+			<table-fowin class="parent" :rankList="data.seasonRankList" :page="1" />
+		</div>
+		
+		<div class="margin-bg" v-if="data.matchState=='GameOver'&&data.weekRankList.length">
+			<div class="top-head vux-1px-b">
+				<div class="left"><span class="icon i-cur"></span>本次周赛前三甲</div>
+				<div class="right"><span class="more" @click="toRanking_M(data.weekRankId,'week')">查看更多</span></div>					
+			</div>
+			<div>
+				<div class="topthree-item vux-1px-b" v-for="(item,index) in data.weekRankList" v-if="index<3">
+					<div class="img" :class="{one:index==0,two:index==1,three:index==2}">
+						<div class="box"><img class="img-center" src="../assets/images/img1.png"/></div>
+					</div>
+					<div class="info">
+						<div class="name">{{item.teamName}}</div>
+						<p>净值：{{item.averageNetworth}}<br />收益率：{{item.profit}}%</p>
+					</div>
+					<a class="btn" v-if="item.interview" :href="item.interview">查看采访</a>
+				</div>
+			</div>
+		</div>
+		
+		<div class="margin-bg" v-if="data.matchState=='GameOver'&&data.seasonRankList">
+			<div class="top-head vux-1px-b">
+				<div class="left"><span class="icon i-cur"></span>本次季赛前三甲</div>
+				<div class="right"><span class="more" @click="toRanking_M(data.seasonRankId,'season')">查看更多</span></div>					
+			</div>
+			<div>
+				<div class="topthree-item vux-1px-b" v-for="(item,index) in data.seasonRankList" v-if="index<3">
+					<div class="img" :class="{one:index==0,two:index==1,three:index==2}">
+						<div class="box"><img class="img-center" src="../assets/images/img1.png"/></div>
+					</div>
+					<div class="info">
+						<div class="name">{{item.teamName}}</div>
+						<p>净值：{{item.averageNetworth}}<br />收益率：{{item.profit}}%</p>
+					</div>
+					<a class="btn" v-if="item.interview" :href="item.interview">查看采访</a>
+				</div>
+			</div>
+		</div>
+		
+		<div class="margin-bg" v-if="data.chartData">
 			<div class="top-head vux-1px-b">
 				<div class="left"><span class="icon i-analysis"></span>赛事分析</div>
 				<div class="right"></div>					
@@ -32,121 +106,65 @@
 				<div class="profit-loss">
 					<div class="box">
 						<div class="progress">
-							<div class="item"></div>
+							<div class="item" :style="{right: profitLost_C}"></div>
 						</div>
-						<div class="focu-box">
+						<div class="focu-box" :style="{right: profitLost_C}">
 							<div class="focu">
 								<span></span>
 								<span></span>
 							</div>
-							<div class="percent-box">
-								<!--<div class="line left vux-1px-b"></div>-->
-								<div class="percent vux-1px-b">盈亏比：76%</div>
-								<div class="line right vux-1px-b"></div>
+							<div class="percent-box" :class="classobj">
+								<div class="line"></div>
+								<div class="percent vux-1px-b">盈亏比：{{data.profitLost}}%</div>								
 							</div>
 						</div>
 					</div>
 					<div class="text"><span>盈</span><span>亏</span></div>
 				</div>
-				<div class="tit">收益率分布</div>
-				<div id="myChart" :style="{width: '100%', height: '300px', 'margin-top': '-50px'}"></div>
-			</div>
-		</div>
-		<div class="enrol-chunk margin-bg">
-			<div class="top-head vux-1px-b">
-				<div class="left"><span class="icon i-progress"></span>报名进度</div>
-				<div class="right"><span class="more">立即建组</span></div>					
-			</div>
-			<div class="content">
-				<div class="step-box">
-					<div class="active">						
-						<div class="statu"><span></span></div>						
-						<p>报名成功</p>
+				<div v-if="data.chartData!='[]'">
+					<div class="tit">收益率分布</div>
+					<div class="echart-label-box">
+						<div class="echart-label" v-for="(item,index) in echartLabel"><span :style="{backgroundColor: echartColor[index]}"></span>{{item.propertyName}}</div>
 					</div>
-					<div class="active">
-						<div class="statu"><span></span></div>
-						<p>完善资料</p>
-					</div>
-					<div>
-						<div class="statu"><span></span></div>
-						<p>组建小组</p>
-					</div>
-					<div>
-						<div class="statu"><span></span></div>
-						<p>等待开赛</p>
-					</div>
-				</div>
-				<p class="tip">提示：本次比赛中允许个人参赛，“组建小组”不是必要步骤。</p>
-			</div>
-		</div>
-		<div class="margin-bg">
-			<div class="top-head vux-1px-b">
-				<div class="left"><span class="icon i-cur"></span>本次竞赛前三甲</div>
-				<div class="right"><span class="more">查看更多</span></div>					
-			</div>
-			<div class="topthree-chunk">
-				<div class="topthree-item vux-1px-b">
-					<div class="img one">
-						<div class="box"><img class="img-center" src="../assets/images/img1.png"/></div>
-					</div>
-					<div class="info">
-						<div class="name">李妍妍</div>
-						<p>净值：146927.9<br />收益率：65.39%</p>
-					</div>
-					<a class="btn">查看采访</a>
-				</div>
-				<div class="topthree-item vux-1px-b">
-					<div class="img two">
-						<div class="box"><img class="img-center" src="../assets/images/img1.png"/></div>
-					</div>
-					<div class="info">
-						<div class="name">李妍妍</div>
-						<p>净值：146927.9<br />收益率：65.39%</p>
-					</div>
-					<a class="btn">查看采访</a>
-				</div>
-				<div class="topthree-item">
-					<div class="img three">
-						<div class="box"><img class="img-center" src="../assets/images/img1.png"/></div>
-					</div>
-					<div class="info">
-						<div class="name">李妍妍</div>
-						<p>净值：146927.9<br />收益率：65.39%</p>
-					</div>
-					<a class="btn">查看采访</a>
+					<div id="myChart" style="width: 100%;height: 300px;margin-top: -80px;"></div>
 				</div>
 			</div>
 		</div>
-		<div class="awards-chunk margin-bg">
+		
+		<div class="awards-chunk margin-bg" v-if="data.seasonPrize">
 			<div class="top-head vux-1px-b">
-				<div class="left"><span class="icon i-award"></span>奖项设置</div>				
+				<div class="left"><span class="icon i-award"></span>季赛奖项设置</div>				
 			</div>
 			<div class="awards-list">
-				<div class="item one">
-					<div>冠军（3名） </div>
-					<div>xxx奖品</div>
-				</div>
-				<div class="item two">
-					<div>亚军（3名） </div>
-					<div>xxx奖品</div>
-				</div>
-				<div class="item three">
-					<div>季军（3名） </div>
-					<div>xxx奖品</div>
+				<div class="item one" v-for="(item,index) in data.seasonPrize" :class="{one:index==0,two:index==1,three:index==2,}">
+					<div>{{item.prizeName}}（{{item.prizeNum}}名） </div>
+					<div>{{item.award}}</div>
 				</div>
 			</div>
 		</div>
-		<div class="rule-chunk margin-bg">
+		
+		<div class="awards-chunk margin-bg" v-if="data.weekPrize">
+			<div class="top-head vux-1px-b">
+				<div class="left"><span class="icon i-award"></span>周赛奖项设置</div>				
+			</div>
+			<div class="awards-list">
+				<div class="item one" v-for="(item,index) in data.weekPrize" :class="{one:index==0,two:index==1,three:index==2,}">
+					<div>{{item.prizeName}}（{{item.prizeNum}}名） </div>
+					<div>{{item.award}}</div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="rule-chunk margin-bg" v-if="data.rule">
 			<div class="top-head vux-1px-b">
 				<div class="left"><span class="icon i-rule"></span>活动规则</div>				
 			</div>
-			<div class="content">
-				<p>1. 此处显示活动规则，可自定义编辑此处显示活动规则，可自定义编辑此处显示活动规则，可自定义编辑此处显示活动规则，可自定义编辑此处显示活动规则，可自定义编辑</p>
-				<p>2. 此处显示活动规则，可自定义编辑此处显示活动规则，可自定义编辑此处显示活动规则，可自定义编辑此处显示活动规则，可自定义编辑此处显示活动规则，可自定义编辑</p>
-				<p>3. 此处显示活动规则，可自定义编辑此处显示活动规则，可自定义编辑此处显示活动规则，可自定义编辑此处显示活动规则，可自定义编辑此处显示活动规则，可自定义编辑</p>
+			<div class="content" v-html="data.rule">
+				
 			</div>
 		</div>
-		<div class="rule-chunk margin-bg">
+		
+		<div class="rule-chunk margin-bg" v-if="data.summary">
 			<div class="top-head vux-1px-b">
 				<div class="left"><span class="icon i-sum"></span>赛事总结</div>				
 			</div>
@@ -154,103 +172,278 @@
 				<p>1. 此处是赛事总结，可自定义编辑此处是赛事总结，可自定义编辑此处是赛事总结，可自定义编辑此处是赛事总结，可自定义编辑</p>
 			</div>
 		</div>
-		<div class="commun-chunk margin-bg">
+		
+		<div class="commun-chunk margin-bg" v-if="data.exchangeGroup">
 			<div class="top-head vux-1px-b">
 				<div class="left"><span class="icon i-commun"></span>官方交流讨论群</div>				
 			</div>
 			<div class="content">
 				<div class="code"><img src="../assets/images/erweima.png"/></div>
-				<p>如已报名参赛，请长按上方二维码，或输入群号加入官方讨论群，群人数上限为1000人，请尽快添加。</p>
+				<p v-html="data.exchangeGroup"></p>
 			</div>
 		</div>
 	</div>
 </template>
 
 <script>
-//	import echarts from 'echarts'
-	var pie = require('echarts');
-	require('echarts/lib/component/tooltip');
-	require('echarts/lib/component/title')
-	import { Step, StepItem, Range } from 'vux'
+	import { Flexbox, FlexboxItem } from 'vux'
 	import TopThree from '@/components/TopThree'
 	import UserRanking from '@/components/UserRanking'
 	import TableFowin from '@/components/TableFowin'
 	export default {
 		data(){
 			return {
-				step: 1
+				data: {},
+				classobj: {one: false, two: true},//盈亏率显示（左或右）
+				echartColor: ['#1e50ae', '#4985f6', '#88b1ff', '#40d28c'],//图表label color
+				echartLabel: [],//图表label
 			}
 		},
+		props: ['id', 'type'],
 		components: {
-			Step,
-			StepItem,
-			Range,
+			Flexbox,
+			FlexboxItem,
 			TopThree,
 			UserRanking,
-			TableFowin
+			TableFowin,
+			//报名进度组件
+			'step-box': {				
+				data(){
+					return {
+						statu1: false,
+						statu2: false,
+						statu3: false,					
+					}
+				},
+				props: ['isTeam', 'myEnrollState'],
+				template: `<div class="step-box">
+					<div class="active">
+						<div class="statu"><span></span></div>					
+						<p>报名成功{{statu(myEnrollState)}}</p>
+					</div>
+					<div :class="{active: statu1}">
+						<div class="statu"><span></span></div>
+						<p>完善资料</p>
+					</div>
+					<div v-if="isTeam=='Y'" :class="{active: statu2}">
+						<div class="statu"><span></span></div>
+						<p>组建小组</p>
+					</div>
+					<div :class="{active: statu3}">
+						<div class="statu"><span></span></div>
+						<p>等待开赛</p>
+					</div>
+				</div>`,
+				methods: {
+					statu(myEnrollState){
+						switch(myEnrollState){
+							case 'ImproveInfo': 
+//								this.statu1 = true;
+								break;
+							case 'NeedTeam': 
+								this.statu1 = true;
+								break;
+							case 'EnrollSuccess': 
+								this.statu1 = this.statu2 = this.statu3 = true;
+								break;
+							default: 
+								this.statu1 = this.statu2 = this.statu3 = false;
+								break;
+						}
+					},
+//					statu2(){
+//						switch(this.matchState){
+//							case 'NeedTeam': return true
+//							case 'EnrollSuccess': return true
+//							default: return false
+//						}
+//					},
+//					statu3(){
+//						switch(this.matchState){
+//							case 'EnrollSuccess': return true
+//							default: return false
+//						}
+//					},
+				}
+			}
 		},
-		mounted(){
-			let myChart = pie.init(document.getElementById('myChart'))
-			myChart.setOption({
-			    title : {
-			        
-			    },
-			    legend: {
-			        
-			    },
-			    series : [
-			        {
-			            name: '访问来源',
-			            type: 'pie',
-			            radius : '55%',
-			            center: ['50%', '60%'],
-			            data:[
-			                {
-			                	value:335,
-			                	itemStyle: {
-			                		normal: {
-			                			color: '#1e50ae'
-			                		}
-			                	}
-			                },
-			                {
-			                	value:310,
-			                	itemStyle: {
-			                		normal: {
-			                			color: '#4985f6'
-			                		}
-			                	}
-			                },
-			                {
-			                	value:234,
-			                	itemStyle: {
-			                		normal: {
-			                			color: '#88b1ff'
-			                		}
-			                	}
-			                },
-			                {
-			                	value:135,
-			                	itemStyle: {
-			                		normal: {
-			                			color: '#40d28c'
-			                		}
-			                	}
-			                }
-			            ],
-			            labelLine: {
-			            	normal: {
-			            		show: false
-			            	}
-			            }
-			        }
-			    ]
-			})
-		}	
+		created(){
+			this.$store.commit('TITLE',{title: '赛事详情'})
+			this.getData();
+		},
+		computed: {
+			//盈亏率显示的位置计算
+			profitLost_C(){
+				let profitLost = this.data.profitLost || 50;
+				if(profitLost > 30){
+					this.classobj.one = true;
+					this.classobj.two = false;
+				}
+				return (100-profitLost) + '%'
+			},
+			//是否显示报名进度
+			enrollProg_C(){
+				let matchState = this.data.matchState
+				let myEnrollState = this.data.myEnrollState
+				if(matchState != 'GameOver' && myEnrollState != 'NotEnroll'){
+					if(matchState == 'InGame' && myEnrollState == 'EnrollSuccess'){
+						return false;
+					}
+					return true;
+				}
+				return false
+			},
+			//赛事状态
+			matchState_C(){
+		  		switch(this.data.matchState){
+		  			case 'UnPublish': return '未发布';
+		  			case 'Enrolling': return '报名中';
+		  			case 'InGame': return '进行中';
+		  			case 'GameOver': return '已结束';
+		  			case 'GameCancel': return '赛事取消';
+		  		}
+		  	},
+		  	//分享或报名btn
+			sharebtn_C(){
+				if(this.data.myEnrollState == 'NotEnroll' && this.data.matchState != 'GameOver'){
+					return '立即<br/>报名'
+				}
+				if(this.data.matchState == 'GameOver' && this.data.myEnrollState == 'EnrollSuccess'){
+					return '我要<br/>分享'
+				}
+				return false
+			},
+		},
+		methods: {
+			//请求数据
+			getData(){
+				this.$post('/api/app/match/findMatchInfoDto.v1', {id: this.id}).then(
+					res => {
+						this.data = res;
+						let chartData = res.chartData
+						let chart = []
+						//是否有图表数据
+						if(chartData){
+							if(typeof chartData !== 'Object'){
+								chartData = JSON.parse(chartData)
+							}
+							for(let i = 0; i < chartData.length; i++){
+								let obj = {
+				                	value: 335,
+				                	itemStyle: {
+				                		normal: {
+				                			color: '#1e50ae'
+				                		}
+				                	}
+				                }
+								obj.value = chartData[i].propertyValue;
+								obj.itemStyle.normal.color = this.echartColor[i];
+								chart.push(obj)
+								this.echartLabel.push({propertyName: chartData[i].propertyName})
+							}
+							setTimeout(() => {
+								this.initEchart_M(chart);
+							}, 500)
+						}
+						
+					}
+				).catch(
+					e => {
+						console.log(e);
+					}
+				)
+			},
+			//初始化图表
+			initEchart_M(chartData){
+				var echarts = require('echarts');
+				var myChart = echarts.init(document.getElementById('myChart'));
+				myChart.setOption({
+				    title : {
+				        
+				    },
+				    legend: {
+				        
+				    },
+				    series : [
+				        {
+				            name: '访问来源',
+				            type: 'pie',
+				            radius : '55%',
+				            center: ['50%', '60%'],
+				            data: chartData,
+				            labelLine: {
+				            	normal: {
+				            		show: false
+				            	}
+				            }
+				        }
+				    ]
+				})
+			},
+			//进入排行榜
+			toRanking_M(randId, historyType){
+				let rankType = this.data.isTeam == 'Y' ? 'group' : 'user'
+				let query = {matchId: this.data.id, rankId: randId, isAlways: this.data.isAlways, historyType: historyType}
+				this.$router.push({name: 'RankingAll', params: {rankType: rankType}, query: query})
+			},
+			//进入建组
+			toCreateTeam_M(id){
+				this.$router.push({name: 'CreateTeam', params:{id: id}})
+			},
+			//报名或分享
+			enrollShare_M(){
+				if(this.data.myEnrollState == 'NotEnroll'){
+					this.$post('/api/app/match/enrollMatch.v1', {matchId: this.id}).then(
+						res => {
+							switch(res.memberState){
+								case 'N': this.$router.push({path: '/survey'});break;
+								case 'W': this.$router.push({path: '/account/sign'});break;
+								case 'C': this.$router.push({path: '/account/upload'});break;
+								case 'E': this.$router.push({path: '/account/open'});break;
+								default: 
+									this.$vux.toast.text('报名成功')
+									setTimeout(() => {
+										this.getData();
+									}, 1000)
+							}
+							
+						}
+					).catch(
+						e => {
+							console.log(e);
+						}
+					)
+				}
+			}
+		}
 	}
 </script>
 
 <style lang="less">
+	.echart-label-box{
+		overflow: hidden;
+	}
+	.echart-label{
+		float: left;
+		display: inline-block;
+		color: #1e50ae;
+		font-size: 15px;
+		line-height: 20px;
+		width: 33.33%;
+		padding: 3px 0;
+	}
+	.echart-label span{
+		display: inline-block;
+		width: 30px;
+		height: 10px;
+		background-color: #4985f6;
+		vertical-align: baseline;
+		margin-right: 5px;
+	}
+	.parent .tbody{
+		height: auto !important;
+		max-height: 279px;
+	}
 	.g-round-btn{
 		position: fixed;
 		right: 15px;
@@ -274,6 +467,7 @@
 		bottom: 5px;
 		color: #fff;
 		font-size: 15px;
+		z-index: 10;
 	}
 	.ban-chunk .label{
 		position: absolute;
@@ -287,6 +481,7 @@
 		line-height: 20px;
 		transform: rotate(45deg);
 		transform-origin: center;
+		z-index: 10;
 	}
 	.ban-chunk .label.active{
 		background-color: #1e50ae;
@@ -302,14 +497,7 @@
 		font-size: 12px;
 		line-height: 2;
 	}
-	.icon-time{
-		margin-right: 5px;
-		display: inline-block;
-		vertical-align: text-bottom;
-		width: 14px;
-		height: 14px;
-		background: url(../assets/images/i_time.png) no-repeat center/100%;
-	}
+	
 	
 	.curlist-chunk{
 		margin-top: 10px;
@@ -533,7 +721,7 @@
 		font-weight: 500;
 	}
 	.profit-loss{
-		margin-bottom: 15px;
+		margin-bottom: 30px;
 	}
 	.profit-loss .progress{
 		width: 100%;
@@ -544,7 +732,7 @@
 	}
 	.profit-loss .progress .item{
 		position: relative;
-		left: -10%;
+		right: 10%;
 		display: block;
 		width: 100%;
 		height: 100%;
@@ -579,7 +767,8 @@
 	.profit-loss .focu-box{
 		position: absolute;
 		top: -10px;
-		right:10% ;
+		right: 10%;
+		margin-right: -13px;
 		z-index: 10;
 	}
 	.profit-loss .box{
@@ -597,11 +786,22 @@
 		display: flex;
 		position: absolute;
 		top: 20px;
-		right: 11px;
 		height: 25px;
+	}
+	.profit-loss .percent-box.one{
+		right: 12px;
+	}
+	.profit-loss .percent-box.two{
+		left: 15px;
 	}
 	.profit-loss .percent-box > div{
 		height: 100%;
+	}
+	.profit-loss .percent-box.one .percent{
+		margin-right: 20px;
+	}
+	.profit-loss .percent-box.two .percent{
+		margin-left: 20px;
 	}
 	.profit-loss .percent{
 		color: #333;
@@ -615,19 +815,36 @@
 		border-color: #1e50ae;
 	}
 	.profit-loss .line{
+		position: absolute !important;
+		top: 0;
 		width: 20px;
 		position: relative;
 		overflow: hidden;
 	}
-	.profit-loss .line.vux-1px-b:after{
-		right: auto;
+	.profit-loss .line:after{
+		
 		width: 100px;
+		content: '';
+	    position: absolute;
+	    top: 23px;
+	    left: 0;
+	    height: 1px;
+	    border-bottom: 1px solid #1E50AE;
+	    color: #1E50AE;
+	    transform-origin: 0 100%;
 	}
-	.profit-loss .line.left.vux-1px-b:after{
-		transform: rotate(45deg);
+	.profit-loss .one .line{
+		right: 0;
+	}
+	.profit-loss .two .line{
+		left: 0;
+	}
+	.profit-loss .two .line:after{
+		transform: scaleY(0.5) rotate(65deg);
 		top: 4px;
+		left: 1px;
 	}
-	.profit-loss .line.right.vux-1px-b:after{
-		transform: rotate(-45deg);
+	.profit-loss .one .line:after{
+		transform: scaleY(0.5) rotate(-65deg);
 	}
 </style>

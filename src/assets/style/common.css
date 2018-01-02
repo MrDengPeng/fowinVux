@@ -6,7 +6,7 @@ body {
 html, body {
   height: 100%;
   width: 100%;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 ::-webkit-input-placeholder{
 	color: #999;
@@ -30,6 +30,9 @@ input[type="search"]::-webkit-search-cancel-button{
 	height: 100%;
 	overflow-y: auto;
 	-webkit-overflow-scrolling: touch;
+}
+.sub-hidden #vux_view_box_body{
+	overflow: hidden !important;
 }
 #vux_view_box_body{
 	position: relative;
@@ -170,6 +173,8 @@ input[type="search"]::-webkit-search-cancel-button{
 	color: #1e50ae;
 	font-size: 12px;
 	font-weight: 500;
+	display: inline-block;
+	vertical-align: bottom;
 }
 .top-head .right .btn{
 	display: inline-block;
@@ -179,12 +184,16 @@ input[type="search"]::-webkit-search-cancel-button{
 	font-size: 14px;
 	line-height: 28px;
 	text-align: center;
+	vertical-align: text-bottom;
 }
 .top-head.vux-1px-b:after{
 	left: 15px;
 }
 .i-cur{
 	background-image: url(~@/assets/images/i_tit5.png);
+}
+.i-me{
+	background-image: url(~@/assets/images/i_tit4.png);
 }
 .i-award{
 	background-image: url(~@/assets/images/i_tit1.png);
@@ -211,6 +220,7 @@ input[type="search"]::-webkit-search-cancel-button{
 	border-radius: 50%;
 	border: 2px solid #1E50AE;
 	overflow: hidden;
+	background-color: #fff;
 }
 .g-avatar > img{
 	position: relative;
@@ -314,9 +324,49 @@ input[type="search"]::-webkit-search-cancel-button{
 	font-size: 16px;
 	line-height: 35px;
 }
-.search-reset .weui-search-bar:after{
+.search-reset .weui-search-bar:before,.search-reset .weui-search-bar:after{
 	display: none;
+}
+.search-reset .weui-search-bar__box .weui-icon-clear{
+	line-height: 35px;
+}
+.search-reset .weui-search-bar__cancel-btn{
+	color: #1E50AE;
+}
+/*ranking search reset*/
+.search-reset-rank .weui-search-bar{
+	background-color: #1E50AE;
+	padding: 15px;
+}
+.search-reset-rank .weui-search-bar__cancel-btn{
+	color: #fff;
+}
+/*icon*/
+.icon-time{
+	margin-right: 5px;
+	display: inline-block;
+	vertical-align: text-bottom;
+	width: 14px;
+	height: 14px;
+	background: url(~@/assets/images/i_time.png) no-repeat center/100%;
+}
+.icon-r-two{
+	display: inline-block;
+	vertical-align: middle;
+	width: 11px;
+	height: 10px;
+	background: url(~@/assets/images/i_arrow_two.png) no-repeat center/100%;
 }
 /*.search-reset .weui-search-bar__label{
 	border: 1px solid #ddd;
 }*/
+
+.search-mask{
+	position: absolute;
+	top: 55px;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: rgba(0,0,0,.3);
+	z-index: 100;
+}

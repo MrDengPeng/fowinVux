@@ -1,58 +1,166 @@
 <template>
   <div class="wrap-box">
+  	<div class="img">
+		<!--<img src="../assets/images/img1.png"/>-->
+	<img :src="data.coverUrl"/>   		
+	</div>
     <div class="content">
-    	<div class="img"><img src="../assets/images/img1.png"/></div>
 	    <div class="head">
-	    	<div class="top-three">
-	    		<div class="item">唐江涛</div>
-	    		<div class="item">李妍妍</div>
-	    		<div class="item">徐语州</div>
+	    	<div class="box">
+	    		<slot name="topThree" :firstName="data.firstName" :secondName="data.secondName" :thirdName="data.thirdName"></slot>
+	    		<slot name="enrol"></slot>
+	    		<!--我的竞赛-->  
+	    		<div v-if="type == '4'">
+	    				<div class="rank-state" v-if="data.myEnrolState == 'EnrollSuccess' && data.matchState != 'Enrolling'">
+				    		<p>{{data.isTeam=='Y'?'小组':'我的'}}排名：<span class="num" v-if="data.myRanking!=0">{{data.myRanking}}</span><span class="num" v-else>暂无</span></p>
+				    		<p>净值：<span v-if="data.myRanking!=0">{{data.myNetworth}}</span><span v-else>暂无</span></p>
+				    		<p>收益率：<span v-if="data.myRanking!=0">{{data.myProfit}}</span><span v-else>暂无</span></p>
+				    	</div>
+				    	<div v-else>
+				    		<div class="btn-box">
+					    		<a class="btn" v-if="data.myEnrolState == 'ImproveInfo'" @click.stop="toAccountUpload">完善资料</a>
+					    		<div class="wait-text" v-else>{{enrollSuc_C}}</div>
+					    	</div>				    	
+					    	<p class="cutoff"><span class="icon-time"></span>报名截止：{{data.enrollTime | splitdate(10)}}</p>
+				    	</div>
+	    		</div>
 	    	</div>
 	    	<div class="statu-box">
-	    		<span class="active">进行中</span>200人
+	    		<span :class="{active: data.matchState!='GameOver'}">{{matchState_C}}</span>{{data.joinNum}}人
 	    	</div>
 	    </div>
 	    <div class="info">
-	    	<div>湘潭大学第一届境外金融交易大赛</div>
-	    	<p>赛事时间：2017-12-01~2017-12-10</p>
+	    	<div>{{data.matchName}}</div>
+	    	<p v-if="data.isAlways!='Y'">赛事时间：{{data.startTime | splitdate(10)}} ~ {{data.endTime | splitdate(10)}}</p>
 	    </div>
+	    <div class="always" v-if="data.isAlways=='Y'">长期</div>
+	    <div class="group-btn vux-1px-t" v-if="data.myTeamId" @click.stop="$emit('toGroupMe', data.id, data.myTeamId)">我的小组</div>
     </div>
   </div>
 </template>
 
 <script>
-import { XButton } from 'vux'
-
-export default {
-  components: {
-    XButton
-  },
-  data () {
-    return {
-      // note: changing this line won't causes changes
-      // with hot-reload because the reloaded component
-      // preserves its current state and we are modifying
-      // its initial state.
-      msg: 'Hello World!'
-    }
-  },
-  mounted(){
-  	
-  }
-}
+	import { XButton } from 'vux'
+	
+	export default {
+	  props: ['data','type'],
+	  computed: {
+	  	//赛事状态
+	  	matchState_C(){
+	  		switch(this.data.matchState){
+	  			case 'UnPublish': return '未发布';
+	  			case 'Enrolling': return '报名中';
+	  			case 'InGame': return '进行中';
+	  			case 'GameOver': return '已结束';
+	  			case 'GameCancel': return '赛事取消';
+	  		}
+	  	},
+	  	//我的排名
+	  	metourna_C(){
+	  		return this.data.myEnrolState == 'EnrollSuccess' && this.data.matchState == 'InGame' ? true : false
+	  	},
+	  	//完善资料
+	  	perfectInfo(){
+	  		if(this.data.myEnrolState == 'ImproveInfo'){
+	  			return '完善资料'
+	  		}
+	  		
+	  	},
+	  	//资料审核或报名成功
+	  	enrollSuc_C(){
+	  		if(this.data.matchState == 'GameOver'){
+	  			return '本次赛事已结束'
+	  		}
+	  		switch(this.data.myEnrolState){
+	  			case 'EnrollSuccess': return '我已报名,等待开赛'
+	  			case 'NeedExamine': return '等待审核资料'
+	  			case 'NeedTeam': return '待组队'
+	  			case 'NeedCrew': return '队友人数不够'
+	  			case 'ErrTeam': return '组队失败'
+	  			default: return ''
+	  		}
+	  	}
+	  },
+	  methods: {
+	  	//完善资料
+	  	toAccountUpload(){
+	  		this.$router.push({name: 'OpenAccount', params: {type: 'upload'}})  		
+	  	}
+	  },
+	  components: {
+	    XButton
+	  },
+	}
 </script>
 <style scoped>
-	
+	.wu-rank{
+		line-height: 180px;
+		font-size: 32px;
+		padding: 0 30px;
+		color: #1E50AE;
+	}
+	.group-btn{
+		color: #1E50AE;
+		font-size: 30px;
+		text-align: center;
+		line-height: 80px;
+		background: url(../assets/images/i_arrow_two.png) no-repeat 430px 33px/22px 20px;
+	}
+	.group-btn .icon-r-two{
+		margin-left: 20px;
+	}
+	.wait-text{
+		color: #1E50AE;
+		font-size: 30px;
+		line-height: 60px;
+		white-space: nowrap;
+		font-weight: 500;
+	}
+	.cutoff{
+		font-size: 24px;
+		padding-left: 30px;
+		white-space: nowrap;
+	}
+	.btn-box{
+		padding: 30px;
+		line-height: 60px;
+	}
+	.btn{
+		display: inline-block;
+		vertical-align: middle;
+		width: 200px;
+		line-height: 60px;
+		color: #fff;
+		font-size: 30px;
+		text-align: center;
+		background-image: linear-gradient(to right, #669bff, #1e50ae);
+		border-radius: 40px;
+	}
 	.wrap-box{
+		position: relative;
 		margin: 40px 30px;
+	}
+	.always{
+		position: absolute;
+		bottom: -22px;
+		right: -50px;
+		transform: rotate(-45deg);
+		background-color: #1E50AE;
+		color: #fff;
+		font-size: 12px;
+		text-align: center;
+		line-height: 1.3;
+		padding: 4px 40px 40px;
+		z-index: 2;
 	}
 	.content{
 		position: relative;
 		background-color: #fff;
 		box-shadow: 0 0 7px rgba(0,0,0,.1);/*no*/
 		border-radius: 8px;
+		overflow: hidden;
 	}
-	.content .img{
+	.img{
 		position: absolute;
 		top: -20px;
 		left: -10px;
@@ -62,7 +170,7 @@ export default {
 		overflow: hidden;
 		z-index: 2;
 	}
-	.content .img img{
+	.img img{
 		position: relative;
 		display: block;
 		top: 50%;
@@ -75,12 +183,33 @@ export default {
 		height: 240px;
 		padding-left: 320px;
 	}
+	.content .head .box{
+		height: 180px;
+		
+	}
+	.rank-state{
+		font-size: 24px;
+		line-height: 44px;
+		padding-left: 30px;
+		padding-top: 20px;
+	}
+	.rank-state span{
+		color: #333;		
+		font-weight: 500;
+	}
+	.rank-state .num{
+		display: inline-block;
+		vertical-align: bottom;
+		font-size: 48px;
+		font-weight: 500;
+		color: #1E50AE;
+	}
 	.top-three{
 		display: flex;
 		padding: 0 20px;
 	}
 	.top-three .item{
-		flex: 1;
+		width: 33.333%;
 		padding-top: 110px;
 		line-height: 40px;
 		color: #333;
@@ -89,6 +218,15 @@ export default {
 		background-repeat: no-repeat;
 		background-size: 80px 110px;
 		font-size: 24px;
+	}
+	.top-three .item > div{
+		margin-top: 4px;
+		line-height: 30px;
+		max-height: 60px;
+		display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 2;
+	overflow: hidden;
 	}
 	.top-three .item:nth-child(1){
 		background-image: url(../assets/images/i_badge1.png);
@@ -100,7 +238,7 @@ export default {
 		background-image: url(../assets/images/i_badge3.png);
 	}
 	.statu-box{
-		padding: 30px 0 0 40px;
+		padding-left: 30px;
 		font-size: 24px;
 	}
 	.statu-box .active{
@@ -117,15 +255,17 @@ export default {
 		font-size: 24px;
 	}
 	.content .info{
-		padding: 30px 20px;
+		padding: 20px 20px 30px;
 	}
 	.content .info div{
+		font-weight: 500;
 		font-size: 36px;
 		color: #333;
+		padding: 10px 0;
+		line-height: 1.3;
 	}
 	.content .info p{
 		font-size: 24px;
-		margin-top: 10px;
 	}
 </style>
 

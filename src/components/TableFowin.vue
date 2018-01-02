@@ -7,15 +7,14 @@
 				<div>净值</div>
 				<div>收益率</div>
 			</div>
-			<div class="tbody" :class="{'h-auto': all}">
-				<div v-for="item in 10" :key="item" class="item vux-1px-b">
+			<div class="tbody" :class="{'h-auto': heightauto}">
+				<div v-for="(item,index) in rankList" class="item vux-1px-b">
 					<div>
-						<span class="badge" v-if="topThreeFn(item)" :class="topThreeFn(item)"></span>
-						<span v-else>{{item}}.</span>
+						<span class="badge" :class="{one: index==0&&page==1,two: index==1&&page==1,three: index==2&&page==1}">{{topThree_M(index)}}</span>
 					</div>
-					<div>王晓涵</div>
-					<div>146927.9</div>
-					<div>56.39%</div>
+					<div>{{item.teamName}}</div>
+					<div>{{item.averageNetworth}}</div>
+					<div>{{item.profit}}%</div>
 				</div>
 			</div>
 		</div>
@@ -25,22 +24,21 @@
 
 <script>
 	export default {
-		props: ['all'],
+		props: ['all', 'rankList', 'heightauto', 'page'],
 		methods: {
-			topThreeFn(index){
-				switch(index){
-					case 1: return 'one'
-					case 2: return 'two'
-					case 3: return 'three'
+			topThree_M(index){
+				index = index + 1;
+				let text = index + '.'				
+				if(this.page == 1){
+					if(index < 4){
+						return ''	
+					}										
+				}else{
+					text = (this.page-1) + text;
 				}
-				return false
+				return text
 			}
 		},
-		computed: {
-			topThreeP(){
-				
-			}
-		}
 	}
 </script>
 <style lang="less" scoped>
@@ -51,6 +49,7 @@
 		background-position: center;
 		background-size: 100% 100%;
 		background-repeat: no-repeat;
+		line-height: 28px;
 	}
 	.one{
 		background-image: url(../assets/images/i_small_badge1.png);
@@ -85,7 +84,8 @@
 	}
 	.table-scroll .tbody{
 		background-color: #fff;
-		height: 279px;
+		/*height: 279px;*/
+		height: 400px;
 		overflow: hidden;
 	}
 	.table-scroll .item{

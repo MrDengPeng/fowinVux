@@ -1,166 +1,223 @@
 <template>
 	<div class="wrap">
-		<div class="bg" style="height: 124px;"></div>
-		<tab v-if="statuCur" class="tab-box" v-model="index" bar-active-color="#fff" active-color="#fff" defaultColor="#a9b5d9" custom-bar-width="40px">
-			<tab-item selected>当前</tab-item>
-			<tab-item>历史</tab-item>
-		</tab>
-		<div v-if="statuCur" class="wrap-box">
-			<swiper v-model="index" :show-dots="false" style="height: 100%;" height="100%">
-				<swiper-item>
-					<div class="view-box">
-						<div class="search-box" style="padding-top: 1px;">
-							<icon type="search" class="i-search" style="top: 12px"></icon>
-							<form action="">
-				                <input type="search" autocomplete="off" placeholder="请输入姓名查找">
-				            </form>
-						</div>
-						<table-fowin all="1" />
-						<div class="page-box">
-							<div>上一页</div>
-							<div>1/13</div>
-							<div>下一页</div>
-						</div>
-					</div>
-				</swiper-item>
-				<swiper-item>
-					<div v-if="!me" class="history-box view-box">
-						<div class="history-item" v-for="item in 10">
-							<div class="head vux-1px-b">
-								<span>上一季度</span>
-								<span>2018-1-1至2018-3-31</span>
+		<div class="search-mask" v-show="searchMask" @touchstart="$refs.search.setBlur()" :style="searchMaskTop"></div>
+		<div class="bg" :style="bgHeight"></div>
+		<div class="warpper" v-if="$route.query.isAlways=='Y'" style="z-index: 2;">
+			<tab class="tab-box" v-model="curIndex" @on-item-click="onIndexChange_M" bar-active-color="#fff" active-color="#fff" defaultColor="#a9b5d9" custom-bar-width="40px">
+				<tab-item selected>当前</tab-item>
+				<tab-item>历史</tab-item>
+			</tab>
+			<div class="wrap-box">
+				<swiper v-model="curIndex" :show-dots="false" @on-index-change="onIndexChange_M" style="height: 100%;" height="100%">
+					<swiper-item>
+						<div class="view-box">
+							<search class="search-reset search-reset-rank" ref="search" :auto-fixed="false" v-model="keyword" @on-submit="onsubmit" @on-focus="searchMask=true" @on-blur="searchMask=false" @on-cancel="oncancel_M"></search>
+							<table-team v-if="rankType=='group'" :groupList="groupList" />
+							<table-fowin v-else all="1" :rankList="userList" />
+							<div class="page-box">
+								<div>上一页</div>
+								<div>1/13</div>
+								<div>下一页</div>
 							</div>
-							<top-three style="padding-bottom: 15px; padding-top: 15px;" />
 						</div>
-					</div>
-					<div class="history-me view-box">
-						<div class="history-me-item" v-for="item in 10">
-							<div class="head vux-1px-b">
-								<span>上一周</span>
-								<span>2018-1-1至2018-1-5</span>
+					</swiper-item>
+					<swiper-item>
+						<div v-if="rankType=='group'" class="history-box view-box">
+							<div class="history-item" v-for="item in historyList">
+								<div class="head vux-1px-b">
+									<span>上一{{weekSeason_C}}</span>
+									<span>{{item.startTime | splitdate(10)}}至{{item.endTime | splitdate(10)}}</span>
+								</div>
+								<top-three :rankList="item.matchRankListDtos" style="padding-bottom: 15px; padding-top: 15px;" />
 							</div>
-							<div class="content">
-								<div class="item">
-									<div>20</div>
-									<p>我的排名</p>
-								</div>
-								<div class="item">
-									<div>181477.67</div>
-									<p>净值</p>
-								</div>
-								<div class="item">
-									<div>10%</div>
-									<p>收益率</p>
-								</div>
-							</div>
-							<span class="semicircle"></span>
-							<span class="semicircle"></span>
 						</div>
-					</div>
-				</swiper-item>
-			</swiper>
+						<div class="history-me view-box" v-else>
+							<div class="history-me-item" v-for="item in historyList">
+								<div class="head vux-1px-b">
+									<span>上一{{weekSeason_C}}</span>
+									<span>{{item.startTime | splitdate(10)}}至{{item.endTime | splitdate(10)}}</span>
+								</div>
+								<div class="content">
+									<div class="item">
+										<div>{{item.myRanking}}</div>
+										<p>我的排名</p>
+									</div>
+									<div class="item">
+										<div>{{item.myNetworth}}</div>
+										<p>净值</p>
+									</div>
+									<div class="item">
+										<div>{{item.myProfit}}%</div>
+										<p>收益率</p>
+									</div>
+								</div>
+								<span class="semicircle"></span>
+								<span class="semicircle"></span>
+							</div>
+						</div>
+					</swiper-item>
+				</swiper>
+			</div>
 		</div>
-		<div v-else style="height: 100%; background-color: #f6f6f6; overflow: auto;">
+		<div v-else style="height: 100%; overflow: auto;position: relative;z-index: 2;">
 			<div class="ranking-box">
-				<div class="search-box" style="padding-bottom: 20px;">
+				<!--<div class="search-box" style="padding-bottom: 20px;">
 					<icon type="search" class="i-search"></icon>
-					<form action="">
-		                <input type="search" autocomplete="off" placeholder="请输入姓名查找">
+					<form action="" @submit.prevent="searchTap">
+		                <input type="search" name="search" v-model="keyword" autocomplete="off" placeholder="请输入姓名查找">
 		            </form>
-				</div>
-				<div class="table-group g-boxshadow">
-					<div class="item head">
-						<div>排名</div>
-						<div>小组</div>
-						<div>净值</div>
-						<div>收益率</div>
-						<div></div>
-					</div>
-					<div class="box" v-for="item in 6">
-						<div class="item main vux-1px-t" @click="subTap(item)">
-							<div>
-								<span class="badge" v-if="topThreeFn(item)" :class="topThreeFn(item)"></span>
-								<span v-else>{{item}}.</span>
-							</div>
-							<div>小组</div>
-							<div>146927.9</div>
-							<div>146927.9</div>
-							<div><x-icon type="ios-arrow-down" :ref="'arrow'+item" size="22" style="fill: #6e6e6e;"></x-icon></div>
-						</div>
-						<div class="sub-box" :ref="'sub'+item" v-show="bool">
-							<div class="item sub" v-for="item in 3">
-								<div></div>
-								<div>王晓涵</div>
-								<div>146927.9</div>
-								<div>56.39%</div>
-								<div></div>
-							</div>
-						</div>
-						
-					</div>
-				</div>
-				<div class="update">榜单每日更新</div>
+				</div>-->
+				<search class="search-reset search-reset-rank" ref="search" :auto-fixed="false" v-model="keyword" @on-submit="onsubmit" @on-focus="searchMask=true" @on-blur="searchMask=false" @on-cancel="oncancel_M"></search>
+				<table-team v-if="rankType=='group'" :groupList="groupList" />
+				<table-fowin v-else all="1" :rankList="userList" :page="params.page" />
+				
 			</div>
 			
 			<!--<table-fowin all="1" />-->
 			<div class="page-box">
-				<div>上一页</div>
-				<div>1/13</div>
-				<div>下一页</div>
+				<div @click.stop="pageData_M('pre')">上一页</div>
+				<div>{{params.page}}/{{pageNum}}</div>
+				<div @click.stop="pageData_M('next')">下一页</div>
 			</div>
 		</div>
 	</div>
 </template>
 
 <script>
-	import { Icon, Tab, TabItem, Swiper, SwiperItem } from 'vux'
+	import { Icon, Tab, TabItem, Swiper, SwiperItem, Search } from 'vux'
 	import TableFowin from '@/components/TableFowin'
 	import TopThree from '@/components/TopThree'
+	import TableTeam from '@/components/TableTeam'
+	
 	export default {
 		data(){
 			return {
-				index: 0,
-				statuCur: true,
-				bool: false,
-				me: true
+				curIndex: 0,
+				
+				userList: [],//当前个人排名
+				groupList: [],//当前小组排名
+				historyList: [],//历史排名
+				keyword: '',//搜索框value
+				params: {realName: '', rankId: this.$route.query.rankId, page: 1, rows: 10},//请求参数(当前)
+				paramsHistory: {matchId: this.$route.query.matchId, type: 'T', rankType: 'Season'},//请求参数(历史)
+				initHistory: false,//是否已初始化历史数据
+				pageNum: 0,//分页数
+				searchMask: false,//搜索遮罩
+				searchMaskTop: {
+					top: this.$route.query.isAlways == 'Y' ? '99px' : '55px'
+				},//搜索遮罩top
+				bgHeight: {
+					height: this.$route.query.isAlways == 'Y' ? '124px' : '80px'
+				},//背景height
 			}
 		},
+		props: ['rankType'],//排名类型 user个人 group小组
+		created(){
+			this.$store.commit('TITLE', {title: '全部排名'})
+			this.getData();
+		},
+		computed: {
+			weekSeason_C(){
+				return this.$route.query.historyType == 'week' ? '周' : '季'
+			}
+		},
+		methods: {
+			//请求当前排名数据
+			getData(){
+				this.$post('/api/app/match/findRankInfo.v1', this.params).then(
+					res => {
+						let rows = res.rows
+						let list = []
+						if(this.rankType == 'user'){
+							for(let i = 0; i < rows.length; i++){
+								let obj = {}
+								obj.teamName = rows[i].name;
+								obj.averageNetworth = rows[i].networth;
+								obj.profit = rows[i].profit;
+								list.push(obj)
+							}
+							this.userList = list;
+						}else{
+							this.groupList = rows;
+						}
+						if(res.total > 0){
+							this.pageNum = Math.ceil(res.total/10);
+						}else{
+							this.pageNum = 1;
+						}
+						
+					}
+				).catch(
+					e => {
+						console.log(e);
+					}
+				)
+			},
+			//翻页
+			pageData_M(direction){
+				if((direction == 'pre' && this.params.page == 1) || (direction == 'next' && this.params.page == this.pageNum)){
+					return
+				}else{
+					if(direction == 'pre'){
+						this.params.page--;											
+					}else{
+						this.params.page++;
+					}
+					this.getData();	
+				}
+				
+			},
+			//搜索
+			onsubmit(e){
+				if(this.keyword.trim() != ''){
+					this.$refs.search.setBlur();
+					this.params.realName = this.keyword;
+					this.params.page = 1;
+					this.getData();
+				}else{
+					this.$vux.toast.text('请输入关键字查询', 'top')
+				}
+				
+			},
+			//取消搜索reset params
+			oncancel_M(){
+				if(this.params.realName != ''){
+					this.params.realName = '';
+					this.params.page = 1;
+					this.getData();
+				}
+				this.keyword = '';				
+			},
+			//监测tab index 来初始化历史数据
+			onIndexChange_M(index){
+				if(index == 1 && !this.initHistory){
+					this.getHistoryData();
+					this.initHistory = true;
+				}
+			},
+			//请求历史排名数据
+			getHistoryData(){
+				this.$post('/api/app/match/findHistoryRank.v1', this.paramsHistory, {loading: false}).then(
+					res => {
+						this.historyList = res
+					}
+				).catch(
+					e => {
+						console.log(e);
+					}
+				)
+			},
+		},
 		components: {
+			Search,
 			Icon,
 			Tab,
 			TabItem,
 			Swiper,
 			SwiperItem,
 			TableFowin,
-			TopThree
-		},
-		methods: {
-			topThreeFn(index){
-				switch(index){
-					case 1: return 'one'
-					case 2: return 'two'
-					case 3: return 'three'
-				}
-				return false
-			},
-			subTap(index){
-				var display = this.$refs['sub'+index][0].style.display;
-				if(display == 'none'){
-					this.$refs['arrow'+index][0].style.transition = 'all .3s';
-					this.$refs['arrow'+index][0].style.transform = 'rotate3d(0, 0, 1, -180deg)';
-					this.$refs['sub'+index][0].style.display = 'block';
-				}else{
-					this.$refs['arrow'+index][0].style.transition = 'all .3s';
-					this.$refs['arrow'+index][0].style.transform = 'rotate3d(0, 0, 1, 0deg)';
-					this.$refs['sub'+index][0].style.display = 'none';
-				}
-			},
-			
-		},
-		computed: {
-			subTwo(bool){
-				return bool
-			}
+			TopThree,
+			TableTeam
 		}
 	}
 </script>
@@ -170,6 +227,9 @@
 	}
 </style>
 <style lang="less" scoped>
+	.search-mask-top99{
+		top: 99px;
+	}
 	/*我的排名 start*/
 	.history-me{
 		background-color: #f6f6f6;
@@ -212,7 +272,8 @@
 		font-size: 18px;
 		color: #1E50AE;
 		font-weight: 500;
-		margin-bottom: 5px;		
+		margin-bottom: 5px;	
+		height: 28px;	
 	}
 	.history-me-item .semicircle{
 		position: absolute;
@@ -232,89 +293,8 @@
 		border-bottom-left-radius: 10px;
 	}
 	/*我的排名 end*/
-	.update{
-		color: #1E50AE;
-		font-size: 12px;
-		padding: 10px 15px;
-	}
-	.arrow-rotate{
-		transform: rotate(180deg);
-	}
-	.badge{
-		display: inline-block;
-		width: 28px;
-		height: 28px;
-		background-position: center;
-		background-size: 100% 100%;
-		background-repeat: no-repeat;
-		vertical-align: middle;
-	}
-	.one{
-		background-image: url(../assets/images/i_small_badge1.png);
-	}
-	.two{
-		background-image: url(../assets/images/i_small_badge2.png);
-	}
-	.three{
-		background-image: url(../assets/images/i_small_badge3.png);
-	}
-	.table-group{
-		position: relative;
-		background-color: #fff;
-		border-radius: 5px;
-		overflow: hidden;
-		z-index: 1;
-		margin-top: -5px;
-	}
-	.table-group .head{
-		height: 40px;
-		font-size: 12px;
-		font-weight: 500;
-		color: #1E50AE;
-		text-align: center;
-		
-	}
-	.table-group .sub{
-		color: #333;
-		font-size: 12px;
-		height: 30px;
-		align-items: stretch !important;
-		line-height: 30px;
-	}
-	.table-group .sub > div:nth-child(2), .table-group .sub > div:nth-child(3), .table-group .sub > div:nth-child(4){
-		background-color: #F6F6F6;
-	}
-	.table-group .main{
-		color: #333;
-		font-size: 15px;
-		height: 50px;
-	}
-	.table-group .main > div:last-child{
-		display: flex;
-		align-content: center;
-		justify-content: center;
-	}
-	.table-group .item{
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		text-align: center;
-	}
-	.table-group .sub-box{
-		padding-bottom: 10px;
-	}
-	.table-group .sub-box .item:nth-child(even) > div:nth-child(2), .table-group .sub-box .item:nth-child(even) > div:nth-child(3), .table-group .sub-box .item:nth-child(even) > div:nth-child(4){
-		background-color: #eaeaea;
-	}
-	.table-group .item > div{
-		flex: 2;
-	}
-	.table-group .item > div:first-child{
-		flex: 1;
-	}
-	.table-group .item > div:last-child{
-		flex: .8;
-	}
+	
+	
 	.main.vux-1px-t:before{
 		border-color: #cfe0ff;
 	}
@@ -364,7 +344,6 @@
 	}
 	.tab-box .vux-tab-item{
 		background: #1E50AE;
-		width: 110px;
 		font-size: 15px;
 		
 	}
@@ -381,9 +360,9 @@
 		top: 0;
 		left: 0;
 		width: 100%;
-		height: 90px;
+		height: 80px;
 		background-color: #1E50AE;
-		z-index: 0;
+		z-index: 1;
 	}
 	.search-box{
 		background-color: #1E50AE;

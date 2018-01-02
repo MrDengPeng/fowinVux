@@ -2,7 +2,7 @@
 	<div>
 		<div class="top-head vux-1px-b">
 			<div class="left">组员（5）</div>
-			<div class="right"><a class="btn">+添加组员</a></div>					
+			<div class="right"><a class="btn" @click="routeTo">+添加组员</a></div>					
 		</div>
 		<div class="g-userinfo-item">
 			<div class="left">
@@ -42,7 +42,15 @@
 
 <script>
 	export default {
-		
+		props: ['id'],
+		created(){
+			console.log(this.id)
+		},
+		methods: {
+			routeTo(){
+				this.$router.push({name: 'CreateTeam'})
+			}
+		}
 	}
 </script>
 

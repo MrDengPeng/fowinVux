@@ -6,7 +6,9 @@ import router from './router'
 import store from './vuex'
 import { sync } from 'vuex-router-sync'
 import App from './App'
-import qs from 'qs'
+import { ScrollPlugin, randomString, hex_sha1 } from './assets/js/utils'
+import { Http } from './assets/js/http'
+Vue.use(ScrollPlugin)
 
 require('amfe-flexible')
 //require('./assets/js/rem')
@@ -15,7 +17,7 @@ FastClick.attach(document.body)
 
 Vue.config.productionTip = false
 
-import { DatetimePlugin, CloseDialogsPlugin, ConfigPlugin, BusPlugin, LocalePlugin, DevicePlugin, ToastPlugin, AlertPlugin, ConfirmPlugin, LoadingPlugin, WechatPlugin, AjaxPlugin, AppPlugin } from 'vux'
+import { querystring, DatetimePlugin, CloseDialogsPlugin, ConfigPlugin, BusPlugin, LocalePlugin, DevicePlugin, ToastPlugin, AlertPlugin, ConfirmPlugin, LoadingPlugin, WechatPlugin, AjaxPlugin, AppPlugin } from 'vux'
 
 store.registerModule('vux', {
   state: {
@@ -60,22 +62,17 @@ Vue.use(BusPlugin)
 Vue.use(DatetimePlugin)
 Vue.use(CloseDialogsPlugin, router)
 
-/*设置请求config*/
-//Vue.http.defaults.baseURL = 'http://1s83h19629.51mypc.cn/Fowin/api/app/'
-Vue.http.defaults.baseURL = 'http://192.168.0.50:8080/Fowin/'
-Vue.http.defaults.timeout = 5000
-Vue.http.defaults.transformRequest = [ (data) => {
-	console.log(data);
-	return qs.stringify(data)
-} ]
-Vue.http.defaults.transformResponse = [function (data) {
-    console.log(JSON.parse(data)); 
-    return JSON.parse(data);
-}]
-Vue.filter('splitdate', function(time){
+//启用http.js
+Vue.use(Http)
+
+
+Vue.filter('splitdate', function(time, index){
+	if(!time){
+		return ''
+	}
 	time = time.trim();
 	if(time.length >= 19){
-		return time.substring(0, time.length-3)		
+		return index ? time.substring(0, index) : time.substring(0, time.length-3)	
 	}
 	return time
 })
@@ -102,7 +99,6 @@ methods.forEach(key => {
 
 router.beforeEach(function (to, from, next) {
   store.commit('updateLoadingStatus', {isLoading: true})
-
   const toIndex = history.getItem(to.path)
   const fromIndex = history.getItem(from.path)
 
@@ -135,14 +131,33 @@ router.beforeEach(function (to, from, next) {
 router.afterEach(function (to) {
   isPush = false
   store.commit('updateLoadingStatus', {isLoading: false})
+   
 //if (process.env.NODE_ENV === 'production') {
 //  ga && ga('set', 'page', to.fullPath)
 //  ga && ga('send', 'pageview')
 //}
 })
-
+const wx = Vue.wechat
+//var noncestr = '6nxfZh2rhp68xPweda8fdRnhzKE57S74'//randomString()
+//var timestamp = 1514359949//Date.now()
+////let str = 'jsapi_ticket=kgt8ON7yVITDhtdwci0qeWgFWFiskGM4FAn7InNYWqejrw9Y4hLirtJ-YnvSPz23xoiiAgajsYNOb9caLVsuuQ&noncestr='+noncestr+'&timestamp='+timestamp+'&url=http://192.168.0.58:80/account/open'
+//var str = 'jsapi_ticket=kgt8ON7yVITDhtdwci0qeWgFWFiskGM4FAn7InNYWqchAvobghhDCIDFepMNjJQayVqH_lOYxUoKuTc_lBACMg&noncestr=6nxfZh2rhp68xPweda8fdRnhzKE57S74&timestamp=1514359949&url=http://192.168.0.58:80/account/open'
+//var signature = hex_sha1(str)
+////
+////
+//console.log(signature)
+//
+//wx.config({
+//  debug: true, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+//  appId: 'wxa7e231e937a1d596', // 必填，公众号的唯一标识
+//  timestamp: 1514359949, // 必填，生成签名的时间戳
+//  nonceStr: '6nxfZh2rhp68xPweda8fdRnhzKE57S74', // 必填，生成签名的随机串
+//  signature: signature,// 必填，签名，见附录1
+//  jsApiList: ['chooseImage'] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
+//});
+Vue.prototype.wx = wx
 /* eslint-disable no-new */
-var vueInstance = new Vue({
+new Vue({
   router,
   store,
   render: h => h(App)

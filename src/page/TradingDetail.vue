@@ -5,7 +5,7 @@
 				<h1>{{data.skillName}}</h1>
 				<p>时间：{{data.createTime | splitdate}}</p>
 			</div>
-			<p class="paragraph">{{data.content}}</p>
+			<p class="paragraph" v-html="data.content"></p>
 			<!--<p class="paragraph">人们之所以发生亏损，最主要的理由莫过于交易者尝试与趋势抗衡，想要猜测市场的头部或底部。交易者务必记住一句古老的市场格言：“趋势是你的朋友”，尽可能顺着趋势方向进行交易。胜算最高的交易，通常也都是顺着趋势方向进行的交易。</p>
 			<p class="paragraph">如果你尝试与趋势抗衡，就等于与市场动能抗衡。市场趋势之所以存在，理由只有一个：市场参与者----整体而言---- 认为行情应该朝着某特定方向发展。在这种情况下，最好挑大的西瓜，站在市场动能的一边，不要站在另一边。不幸的，在趋势发展过程中，贪婪的心理经常促使很多人试图猜测市场的头部或底部。</p>
 			<img class="img" src="../assets/images/img1.png"/>
@@ -32,19 +32,13 @@
 		},
 		methods: {
 			getData(){
-				this.$vux.loading.show({
-					text: '加载中'
-				})
-				this.$http.post('/api/app/skill/findById.v1', {id: this.id}).then(
+				this.$post('/api/app/skill/findById.v1', {id: this.id}).then(
 					res => {
-						this.$vux.loading.hide();
-						this.data = res.data.data;
+						this.data = res;
 					}
 				).catch(
 					e => {
 						console.log(e);
-						this.$vux.loading.hide();
-						this.$vux.toast.text('请求出错', 'middle')
 					}
 				)
 			}

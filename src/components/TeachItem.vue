@@ -1,6 +1,6 @@
 <template>
-	<div class="box vux-1px-b">
-		<div class="img"><img class="img-center" src="../assets/images/img2.png"/></div>
+	<div class="box vux-1px-b" @click="$emit('toDetail', data.id)">
+		<div class="img"><img class="img-center" :src="data.photoUrl"/></div>
 		<div class="content">
 			<div class="tit white-space">{{data.videoName}}</div>
 			<div class="s-label active">{{data.level}}</div>

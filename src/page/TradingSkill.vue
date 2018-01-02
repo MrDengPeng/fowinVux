@@ -2,11 +2,11 @@
 	<div>
 		<view-box ref="viewBox">
 			<div class="search-reset">
-				<search ref="search" :auto-fixed="false" v-model="skillName" @on-submit="onsubmit" @on-cancel="oncancel"></search>
-				<div class="list vux-1px-b" v-for="item in data" @click="routeTo(item.id)">
-					<div class="img"><img class="img-center" src="../assets/images/img1.png"/></div>
+				<search ref="search" :auto-fixed="false" v-model="keyword" @on-submit="onsubmit" @on-focus="searchMask=true" @on-blur="searchMask=false" @on-cancel="oncancel_M"></search>
+				<div class="list vux-1px-b" v-for="item in data" @click="toDetail(item.id)">
+					<div class="img"><img class="img-center" :src="item.photoUrl"/></div>
 					<div class="cont">
-						<div class="tit">{{item.content}}</div>
+						<div class="tit">{{item.skillName}}</div>
 						<div class="time">{{item.createTime | splitdate}}</div>
 					</div>
 				</div>
@@ -14,50 +14,47 @@
 					<load-more :show-loading="more" :tip="more ? '正在加载' : '我是有底线的'" background-color="#f6f6f6"></load-more>
 				</div>
 			</div>
-		</view-box>		
+		</view-box>
+		<div class="search-mask" v-show="searchMask" @touchstart="$refs.search.setBlur()"></div>
 	</div>
 </template>
 
 <script>
 	import { Search, LoadMore, ViewBox } from 'vux'
 	import { mapMutations } from 'vuex'
+	
 	export default {
 		name: 'TradingSkill',
 		data () {
 			return {
-				skillName: '',
+				keyword: '',
 				params: { page: 1, rows: 10, skillName: ''},
-				scrollBody: null,
+				scrollBody: null,//滚动盒子
 				data: [],
-				more: true,
-				scrollTop: 0,
+				more: true,//是否有更多数据
+				searchMask: false,//搜索遮罩
 			}
 		},
 		activated(){
-			this.$refs.viewBox.scrollTo(this.scrollTop);
+			/*滚动到上次滚动的距离*/
+			this.$refs.viewBox.scrollTo(this.scrollTop || 0);
 		  	this.TITLE({title: '交易技巧'});
 		},
-		  deactivated(){
+		deactivated(){
+		  	/*保存滚动距离*/
 		  	this.scrollTop = this.$refs.viewBox.getScrollTop();
-		  	console.log(this.$refs.viewBox.getScrollTop())
-		},
-		components: {
-			Search,
-			LoadMore,
-			ViewBox,
 		},
 		mounted () {
-			this.scrollBody = this.$refs.viewBox.getScrollBody();
-			this.getData();			
+			//初始化滚动插件
+			let viewBox = this.$refs.viewBox;
+			this.scrollInstance = new this.ScrollPlugin(viewBox, viewBox.getScrollBody(), viewBox.getScrollBody().children[0], this.getData, true);//true自动加载一次数据
 		},
 		methods: {
 			...mapMutations(['TITLE']),
 			getData () {
-				this.scrollBody.removeEventListener('scroll', this.scrollBottom);
-				this.$http.post('api/app/skill/findForPage.v1', this.params).then(
+				this.$post('api/app/skill/findForPage.v1', this.params).then(
 					res => {
-						this.$vux.loading.hide();
-						let rows = res.data.data.rows;
+						let rows = res.rows;
 						if(this.params.page == 1){
 							this.data = rows;							
 							rows.length ===0 && this.$vux.toast.text('没有相关数据', 'middle')
@@ -69,59 +66,48 @@
 						}else{
 							this.more = true;
 							this.params.page++;
-							this.onscroll();
+							this.scrollInstance.addEvent();
 						}						
 					}
 				).catch(
 					e => {
 						console.log(e);
-						this.$vux.loading.hide();
-						this.$vux.toast.text('请求出错', 'middle')
 					}
 				)
 			},
+			//搜索
 			onsubmit(){
-				
-				if(this.skillName.trim() != ''){
+				let keyword = this.keyword.trim()
+				if(keyword != ''){
 					this.$refs.search.setBlur();
-					this.params.skillName = this.skillName.trim();
+					this.params.skillName = keyword;
 					this.params.page = 1;
-					this.$vux.loading.show({
-						text: '加载中'
-					});
 					this.getData();
 				}else{
 					this.$vux.toast.text('请输入关键字查询', 'top')
 				}
 				
 			},
+			//取消搜索reset params
 			oncancel(){
 				if(this.params.skillName != ''){
 					this.params.skillName = '';
 					this.params.page = 1;
-					this.$vux.loading.show({
-						text: '加载中'
-					});
 					this.getData();
 				}
-				this.skillName = '';
-				
+				this.keyword = '';				
 			},
-			onscroll(){
-				this.scrollBody.addEventListener('scroll', this.scrollBottom, false);
-			},
-			scrollBottom(){
-				var parentHeight = this.scrollBody.offsetHeight + this.$refs.viewBox.getScrollTop();
-				var childHeight = this.scrollBody.children[0].offsetHeight;
-				if(parentHeight >= childHeight){
-					this.getData();
-				}
-			},
-			routeTo(id){
+			//进入详情
+			toDetail(id){
 				this.TITLE({title: '技巧详情'});
 				this.$router.push({name: 'TradingDetail', params: {id: id}})
 			}
-		}
+		},
+		components: {
+			Search,
+			LoadMore,
+			ViewBox,
+		},
 	}
 </script>
 <style scoped>

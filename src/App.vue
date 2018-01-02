@@ -20,7 +20,7 @@
         	<transition        	
 	        @after-enter="$vux.bus && $vux.bus.$emit('vux:after-view-enter')"
 	        :name="viewTransition" :css="!!direction">
-	        				<keep-alive include="TradingSkill,CollegeList,TradingDetail">
+	        				<keep-alive include="TradingSkill,TradingDetail,VideoTeach,VideoDetail">
 					        	<router-view class="router-view"></router-view>					        	
 					        </keep-alive>
 	        </transition>
@@ -40,7 +40,7 @@
 </template>
 
 <script>
-import { XHeader, Loading, TransferDom, ViewBox } from 'vux'
+import { XHeader, Loading, TransferDom, ViewBox, querystring } from 'vux'
 import { mapState, mapActions } from 'vuex'
 
 export default {
@@ -61,6 +61,10 @@ export default {
     	console.log(this.$refs.viewBox)
     }
   },
+  created(){		
+			
+		
+  },
   mounted () {
     this.handler = () => {
       if (this.path === '/demo') {
@@ -68,6 +72,7 @@ export default {
         this.updateDemoPosition(this.box.scrollTop)
       }
     }
+    
   },
   beforeDestroy () {
     this.box && this.box.removeEventListener('scroll', this.handler, false)

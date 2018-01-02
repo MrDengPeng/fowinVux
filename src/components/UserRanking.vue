@@ -1,18 +1,21 @@
 <template>
 	<div class="team-wrap">
 		<div class="team-box g-boxshadow">
-			<div class="g-avatar"><img src="../assets/images/img1.png"/></div>
+			<div class="g-avatar"><img :src="data.myAvatar"/></div>
 			<div class="team-info">
 				<div class="item">
-					<div>20</div>
-					<p>小组排名</p>
+					<div v-if="data.myRanking!=0">{{data.myRanking}}</div>
+					<div v-else>暂无</div>
+					<p>{{isTeam=='Y'?'小组':'我的'}}排名</p>
 				</div>
 				<div class="item">
-					<div>181477.67</div>
+					<div v-if="data.myRanking!=0">{{data.myNetworth}}</div>
+					<div v-else>暂无</div>
 					<p>净值</p>
 				</div>
 				<div class="item">
-					<div>44.2%</div>
+					<div v-if="data.myRanking!=0">{{data.myProfit}}%</div>
+					<div v-else>暂无</div>
 					<p>收益率</p>
 				</div>
 			</div>
@@ -22,7 +25,17 @@
 
 <script>
 	export default {
-		
+		props: ['data', 'isTeam'],
+		created(){
+			console.log(this.data.myAvatar)
+		},
+		computed: {
+			rank_C(){
+				if(this.data.myRanking){
+					
+				}
+			}
+		}
 	}
 </script>
 
@@ -56,6 +69,7 @@
 		color: #1E50AE;
 		font-size: 18px;
 		font-weight: 500;
+		height: 28px;
 	}
 	.team-info .item p{
 		font-size: 12px;

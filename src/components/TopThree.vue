@@ -1,22 +1,28 @@
 <template>
 	<div class="box">
 		<flexbox align="flex-end">
+			<!--<flexbox-item v-for="item in topThree" :key="item.id" :order="order_M(item.ranking)" :class="{leftflex: item.ranking==2}">
+				<div class="item-box g-boxshadow" :class="{one: item.ranking==1,two: item.ranking==2,three: item.ranking==3}">
+					<div class="name">{{item.teamName}}</div>
+					<p class="data">{{item.averageNetworth}}<br />{{item.profit}}%</p>
+				</div>
+			</flexbox-item>-->
 			<flexbox-item>
-				<div class="item-box two g-boxshadow">
-					<div class="name">唐江涛</div>
-					<p class="data">146927.9<br />65.39%</p>
+				<div class="item-box g-boxshadow two">
+					<div class="name">{{topThree[1].teamName}}</div>
+					<p class="data">{{topThree[1].averageNetworth}}<br />{{topThree[1].profit}}%</p>
 				</div>
 			</flexbox-item>
 			<flexbox-item>
-				<div class="item-box one g-boxshadow">
-					<div class="name">唐江涛</div>
-					<p class="data">146927.9<br />65.39%</p>
+				<div class="item-box g-boxshadow one">
+					<div class="name">{{topThree[0].teamName}}</div>
+					<p class="data">{{topThree[0].averageNetworth}}<br />{{topThree[0].profit}}%</p>
 				</div>
 			</flexbox-item>
 			<flexbox-item>
-				<div class="item-box three g-boxshadow">
-					<div class="name">唐江涛</div>
-					<p class="data">146927.9<br />65.39%</p>
+				<div class="item-box g-boxshadow three">
+					<div class="name"><span v-if="topThree[2]">{{topThree[2].teamName}}</span><span v-else>暂无</span></div>
+					<p class="data"><span v-if="topThree[2]">{{topThree[2].averageNetworth}}</span><span v-else>暂无</span><br /><span v-if="topThree[2]">{{topThree[2].profit}}</span><span v-else>暂无</span></p>
 				</div>
 			</flexbox-item>
 		</flexbox>
@@ -26,14 +32,33 @@
 <script>
 	import { Flexbox, FlexboxItem} from 'vux'
 	export default {
+		props: ['topThree'],
+		
+		created(){
+			
+		},
+		methods: {
+			//调整前三名位置
+			order_M(ranking){
+				switch(ranking){
+					case 1: return 2
+					case 2: return 1
+					case 3: return 3
+				}
+			}
+		},
 		components: {
 			Flexbox,
 			FlexboxItem
-		}
+		},
 	}
 </script>
 
 <style lang="less" scoped>
+	.leftflex{
+		margin-left: 0 !important;
+		margin-right: 8px !important;
+	}
 	.box{
 		background-color: #fff;
 		padding: 0 10px;

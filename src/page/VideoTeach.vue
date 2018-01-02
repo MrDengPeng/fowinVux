@@ -1,14 +1,15 @@
 <template>
-	<div style="background-color: #fff;">
+	<div>
 		<view-box ref="viewBox">
 			<div class="search-reset">
-				<search ref="search" :auto-fixed="false" v-model="videoName" @on-submit="onsubmit" @on-cancel="oncancel"></search>
-				<teach-item v-for="item in data" :data="item" :key="item.id" />
+				<search ref="search" :auto-fixed="false" v-model="videoName" @on-submit="onsubmit" @on-focus="searchMask=true" @on-blur="searchMask=false" @on-cancel="oncancel_M"></search>
+				<teach-item v-for="item in data" :data="item" :key="item.id" @toDetail="toDetail" />
 				<div style="padding: 1px;">
 					<load-more :show-loading="more" :tip="more ? '正在加载' : '我是有底线的'" background-color="#f6f6f6"></load-more>
 				</div>
 			</div>
-		</view-box>	
+		</view-box>
+		<div class="search-mask" v-show="searchMask" @touchstart="$refs.search.setBlur()"></div>
 	</div>
 </template>
 
@@ -16,7 +17,9 @@
 	import { Search, LoadMore, ViewBox } from 'vux'
 	import TeachItem from '@/components/TeachItem'
 	import { mapMutations } from 'vuex'
+	
 	export default {
+		name: 'VideoDetail',
 		data () {
 			return {
 				videoName: '',
@@ -24,7 +27,7 @@
 				scrollBody: null,
 				data: [],
 				more: true,
-				scrollTop: 0,
+				searchMask: false
 			}
 		},
 		components: {
@@ -34,25 +37,26 @@
 			TeachItem
 		},
 		activated(){
-			this.$refs.viewBox.scrollTo(this.scrollTop);
+			//滚动至上次的位置
+			this.$refs.viewBox.scrollTo(this.scrollTop || 0);
 		  	this.TITLE({title: '交易技巧'});
 		},
-		  deactivated(){
+		deactivated(){
+			//保存滚动位置
 		  	this.scrollTop = this.$refs.viewBox.getScrollTop();
-		  	console.log(this.$refs.viewBox.getScrollTop())
 		},
 		mounted () {
-			this.scrollBody = this.$refs.viewBox.getScrollBody();
-			this.getData();			
+			//初始化上拉加载插件
+			let viewBox = this.$refs.viewBox;
+			this.scrollInstance = new this.ScrollPlugin(viewBox, viewBox.getScrollBody(), viewBox.getScrollBody().children[0], this.getData, true);//true自动加载一次数据		
 		},
 		methods: {
 			...mapMutations(['TITLE']),
 			getData () {
-				this.scrollBody.removeEventListener('scroll', this.scrollBottom);
-				this.$http.post('api/app/video/findForPage.v1', this.params).then(
+				this.$post('api/app/video/findForPage.v1', this.params).then(
 					res => {
-						this.$vux.loading.hide();
-						let rows = res.data.data.rows;
+						console.log(res)
+						let rows = res.rows;
 						if(this.params.page == 1){
 							this.data = rows;							
 							rows.length ===0 && this.$vux.toast.text('没有相关数据', 'middle')
@@ -64,57 +68,41 @@
 						}else{
 							this.more = true;
 							this.params.page++;
-							this.onscroll();
+							this.scrollInstance.addEvent();
 						}						
 					}
 				).catch(
 					e => {
 						console.log(e);
-						this.$vux.loading.hide();
-						this.$vux.toast.text('请求出错', 'middle')
 					}
 				)
 			},
-			onsubmit(){
-				
+			//搜索
+			onsubmit(){				
 				if(this.videoName.trim() != ''){
 					this.$refs.search.setBlur();
 					this.params.videoName = this.videoName.trim();
 					this.params.page = 1;
-					this.$vux.loading.show({
-						text: '加载中'
-					});
 					this.getData();
 				}else{
 					this.$vux.toast.text('请输入关键字查询', 'top')
 				}
 				
 			},
-			oncancel(){
+			//取消搜索并reset params
+			oncancel_M(){
 				if(this.params.videoName != ''){
 					this.params.videoName = '';
 					this.params.page = 1;
-					this.$vux.loading.show({
-						text: '加载中'
-					});
 					this.getData();
 				}
 				this.videoName = '';
 				
 			},
-			onscroll(){
-				this.scrollBody.addEventListener('scroll', this.scrollBottom, false);
-			},
-			scrollBottom(){
-				var parentHeight = this.scrollBody.offsetHeight + this.$refs.viewBox.getScrollTop();
-				var childHeight = this.scrollBody.children[0].offsetHeight;
-				if(parentHeight >= childHeight){
-					this.getData();
-				}
-			},
-			routeTo(id){
-				this.TITLE({title: '技巧详情'});
-				this.$router.push({name: 'TradingDetail', params: {id: id}})
+			//进入详情
+			toDetail(id){
+				this.TITLE({title: '视频详情'});
+				this.$router.push({name: 'VideoDetail', params: {id: id}})
 			}
 		}
 	}
