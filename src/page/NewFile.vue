@@ -1,5 +1,5 @@
 <template>
-	<div>123</div>
+	<div></div>
 </template>
 
 <script>
@@ -13,6 +13,7 @@
 					res => {
 						let stateObj = querystring.parse(location.search.substring(1))
 						localStorage.setItem('token',res.token);
+						localStorage.setItem('statu',res.examineState);
 						location.replace(stateObj.state)
 					}
 				)

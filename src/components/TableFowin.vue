@@ -3,7 +3,7 @@
 		<div class="table-scroll g-boxshadow">
 			<div class="thead item vux-1px-b" :class="{'thead-white': all}">
 				<div>排名</div>
-				<div>姓名</div>
+				<div>{{isTeam=='Y'?'小组':'姓名'}}</div>
 				<div>净值</div>
 				<div>收益率</div>
 			</div>
@@ -24,19 +24,17 @@
 
 <script>
 	export default {
-		props: ['all', 'rankList', 'heightauto', 'page'],
+		props: ['all', 'rankList', 'heightauto', 'page', 'isTeam'],
 		methods: {
 			topThree_M(index){
 				index = index + 1;
-				let text = index + '.'				
-				if(this.page == 1){
-					if(index < 4){
-						return ''	
-					}										
-				}else{
-					text = (this.page-1) + text;
-				}
-				return text
+				index = (this.page-1)*10 +index;
+				
+				if(index < 4){
+					return ''	
+				}										
+
+				return index + '.'
 			}
 		},
 	}

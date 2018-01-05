@@ -20,7 +20,7 @@
         	<transition        	
 	        @after-enter="$vux.bus && $vux.bus.$emit('vux:after-view-enter')"
 	        :name="viewTransition" :css="!!direction">
-	        				<keep-alive include="TradingSkill,TradingDetail,VideoTeach,VideoDetail">
+	        				<keep-alive include="CollegeList,CollegeDetail,TradingSkill,TradingDetail,VideoTeach,VideoDetail">
 					        	<router-view class="router-view"></router-view>					        	
 					        </keep-alive>
 	        </transition>
@@ -42,6 +42,7 @@
 <script>
 import { XHeader, Loading, TransferDom, ViewBox, querystring } from 'vux'
 import { mapState, mapActions } from 'vuex'
+import { appid } from '@/assets/js/http'
 
 export default {
 	name: 'app',
@@ -61,8 +62,22 @@ export default {
     	console.log(this.$refs.viewBox)
     }
   },
-  created(){		
-			
+  created(){
+			this.$post('/api/weixin/checkSignAtion', {url: location.href}).then(
+				res => {
+					if(typeof res === 'string'){
+						res = JSON.parse(res);
+					}
+					this.wx.config({
+					  //debug: true, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+					  appId: appid,//'wxa7e231e937a1d596', // 必填，公众号的唯一标识
+					  timestamp: res.timestamp, // 必填，生成签名的时间戳
+					  nonceStr: res.noncestr, // 必填，生成签名的随机串
+					  signature: res.signature,// 必填，签名，见附录1
+					  jsApiList: ['chooseImage','getLocalImgData'] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
+					});
+				}
+			)
 		
   },
   mounted () {

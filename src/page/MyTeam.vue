@@ -8,7 +8,7 @@
 			<div class="left">组员（{{data.rankListDtos.length}}）</div>
 			<div class="right"><a class="btn" @click="routeTo_M">{{identity_C}}</a></div>					
 		</div>
-		<user-ranking :data="{myRanking:data.name,myNetworth:data.networth,myProfit:data.profit,myAvatar:avatar_C}" type="Y" style="padding-top: 30px; padding-bottom: 15px;" />
+		<user-ranking :data="{myRanking:data.name,myNetworth:data.networth,myProfit:data.profit,myAvatar:avatar_C}" isTeam="Y" style="padding-top: 30px; padding-bottom: 15px;" />
 		<div v-for="item in data.rankListDtos" class="g-userinfo-item vux-1px-t">
 			<div class="left">
 				<div class="g-avatar"><img :src="item.avatar"/></div>

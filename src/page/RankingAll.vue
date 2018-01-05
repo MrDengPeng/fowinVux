@@ -13,28 +13,19 @@
 						<div class="view-box">
 							<search class="search-reset search-reset-rank" ref="search" :auto-fixed="false" v-model="keyword" @on-submit="onsubmit" @on-focus="searchMask=true" @on-blur="searchMask=false" @on-cancel="oncancel_M"></search>
 							<table-team v-if="rankType=='group'" :groupList="groupList" />
-							<table-fowin v-else all="1" :rankList="userList" />
+							<table-fowin v-else all="1" :rankList="userList" :page="params.page"/>
 							<div class="page-box">
-								<div>上一页</div>
-								<div>1/13</div>
-								<div>下一页</div>
+								<div @click.stop="pageData_M('pre')">上一页</div>
+								<div>{{params.page}}/{{pageNum}}</div>
+								<div @click.stop="pageData_M('next')">下一页</div>
 							</div>
 						</div>
 					</swiper-item>
-					<swiper-item>
-						<div v-if="rankType=='group'" class="history-box view-box">
-							<div class="history-item" v-for="item in historyList">
+					<swiper-item>						
+						<div class="history-me view-box" v-if="$route.query.hisUser=='M'">
+							<div class="history-me-item" v-for="(item,index) in historyList">
 								<div class="head vux-1px-b">
-									<span>上一{{weekSeason_C}}</span>
-									<span>{{item.startTime | splitdate(10)}}至{{item.endTime | splitdate(10)}}</span>
-								</div>
-								<top-three :rankList="item.matchRankListDtos" style="padding-bottom: 15px; padding-top: 15px;" />
-							</div>
-						</div>
-						<div class="history-me view-box" v-else>
-							<div class="history-me-item" v-for="item in historyList">
-								<div class="head vux-1px-b">
-									<span>上一{{weekSeason_C}}</span>
+									<span>{{weekSeason_M(item.startTime,index)}}</span>
 									<span>{{item.startTime | splitdate(10)}}至{{item.endTime | splitdate(10)}}</span>
 								</div>
 								<div class="content">
@@ -55,6 +46,15 @@
 								<span class="semicircle"></span>
 							</div>
 						</div>
+						<div class="history-box view-box" v-else>
+							<div class="history-item" v-for="(item,index) in historyList">
+								<div class="head vux-1px-b">
+									<span>{{weekSeason_M(item.startTime,index)}}</span>
+									<span>{{item.startTime | splitdate(10)}}至{{item.endTime | splitdate(10)}}</span>
+								</div>
+								<top-three :topThree="item.matchRankListDtos" style="padding-bottom: 15px; padding-top: 15px;" />
+							</div>
+						</div>
 					</swiper-item>
 				</swiper>
 			</div>
@@ -72,8 +72,6 @@
 				<table-fowin v-else all="1" :rankList="userList" :page="params.page" />
 				
 			</div>
-			
-			<!--<table-fowin all="1" />-->
 			<div class="page-box">
 				<div @click.stop="pageData_M('pre')">上一页</div>
 				<div>{{params.page}}/{{pageNum}}</div>
@@ -88,6 +86,7 @@
 	import TableFowin from '@/components/TableFowin'
 	import TopThree from '@/components/TopThree'
 	import TableTeam from '@/components/TableTeam'
+	import { getWeekNumber } from '@/assets/js/utils'
 	
 	export default {
 		data(){
@@ -99,7 +98,7 @@
 				historyList: [],//历史排名
 				keyword: '',//搜索框value
 				params: {realName: '', rankId: this.$route.query.rankId, page: 1, rows: 10},//请求参数(当前)
-				paramsHistory: {matchId: this.$route.query.matchId, type: 'T', rankType: 'Season'},//请求参数(历史)
+				paramsHistory: {matchId: this.$route.query.matchId, type: this.$route.query.hisUser, rankType: this.$route.query.historyType},//请求参数(历史)
 				initHistory: false,//是否已初始化历史数据
 				pageNum: 0,//分页数
 				searchMask: false,//搜索遮罩
@@ -117,9 +116,7 @@
 			this.getData();
 		},
 		computed: {
-			weekSeason_C(){
-				return this.$route.query.historyType == 'week' ? '周' : '季'
-			}
+			
 		},
 		methods: {
 			//请求当前排名数据
@@ -169,14 +166,10 @@
 			},
 			//搜索
 			onsubmit(e){
-				if(this.keyword.trim() != ''){
-					this.$refs.search.setBlur();
-					this.params.realName = this.keyword;
-					this.params.page = 1;
-					this.getData();
-				}else{
-					this.$vux.toast.text('请输入关键字查询', 'top')
-				}
+				this.$refs.search.setBlur();
+				this.params.realName = this.keyword.trim();
+				this.params.page = 1;
+				this.getData();
 				
 			},
 			//取消搜索reset params
@@ -207,6 +200,28 @@
 					}
 				)
 			},
+			//计算周或季
+			weekSeason_M(time,index){
+				let timeArr = time.substring(0,10).split('-');
+				if(this.$route.query.historyType == 'week'){
+					let num = this.historyList.length+1;
+					if(index == 0){
+						return '上一周'
+					}
+					return '第'+(num-(index+1))+'周'
+				}else{
+					let text = '第一季'
+					if(timeArr[1] > 9){
+						text = '第四季';
+					}else if(timeArr[1] > 6){
+						text = '第三季';
+					}else if(timeArr[1] > 3){
+						text = '第二季';
+					}
+					return text
+				}
+				
+			}
 		},
 		components: {
 			Search,

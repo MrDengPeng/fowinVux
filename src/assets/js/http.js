@@ -3,19 +3,25 @@
  */
 import axios from 'axios';
 import qs from 'qs';
-//import { ToastPlugin, LoadingPlugin } from 'vux'
+
+const appid = 'wx87746b65f32efdd1'
+const httpip = 'http://hy.ixxdc.com'
+
+//const appid = 'wxa7e231e937a1d596'
+//const httpip = 'http://192.168.0.50'
+
 //localStorage.removeItem('token')
+//localStorage.setItem('token','08499097fada427693b6ea334a39f90f')
 const token = localStorage.getItem('token')
 
 
 var instance = axios.create({
-    baseURL: 'http://192.168.0.50:8080/Fowin/',
+    baseURL: httpip+'/Fowin/',
     headers: { 
     	'Content-Type': 'application/x-www-form-urlencoded',
     },
     timeout: 100000,
     transformRequest: [ (data) => {
-//		Object.assign(data, {token: '6a766615b59863dabf2543f44f1d91c8'})
 		Object.assign(data, {token: token})
 		console.log(data);
 		return qs.stringify(data)
@@ -112,6 +118,7 @@ HttpPlugin.prototype.upload = function (url, params, options = {}) {
 HttpPlugin.prototype.handlerSuccess = function (res, resolve, reject, allData) {
 	console.log(res.data)
 	this.Vue.$vux.loading.hide();
+//	localStorage.setItem('token','3aa77cca7cc5448220cc43cc2986dc29')
     // 请求成功
     if (res.data.code == 0) {
     	let data = allData ? res.data : res.data.data
@@ -119,8 +126,9 @@ HttpPlugin.prototype.handlerSuccess = function (res, resolve, reject, allData) {
         return;
     }else if(res.data.code == 11000){
   		let params = encodeURIComponent(location.href)
-  		let url = encodeURIComponent('http://192.168.0.58/#/new')
-		location.href = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxa7e231e937a1d596&redirect_uri='+url+'&response_type=code&scope=snsapi_userinfo&state='+params+'#wechat_redirect'
+		let url = encodeURIComponent(httpip+'/dist/#/new')
+//		let url = encodeURIComponent('http://192.168.0.58/#/new')
+		location.href = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid='+appid+'&redirect_uri='+url+'&response_type=code&scope=snsapi_userinfo&state='+params+'#wechat_redirect'
       	
     }else{
     	this.Vue.$vux.toast.text(res.data.msg);
@@ -142,5 +150,6 @@ HttpPlugin.prototype.handlerError = function (error, reject) {
 }
 let Http = new HttpPlugin()
 export {
-	Http
+	Http,
+	appid
 }

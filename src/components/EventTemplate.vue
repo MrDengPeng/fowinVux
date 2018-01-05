@@ -59,13 +59,6 @@
 	  	metourna_C(){
 	  		return this.data.myEnrolState == 'EnrollSuccess' && this.data.matchState == 'InGame' ? true : false
 	  	},
-	  	//完善资料
-	  	perfectInfo(){
-	  		if(this.data.myEnrolState == 'ImproveInfo'){
-	  			return '完善资料'
-	  		}
-	  		
-	  	},
 	  	//资料审核或报名成功
 	  	enrollSuc_C(){
 	  		if(this.data.matchState == 'GameOver'){
@@ -73,6 +66,7 @@
 	  		}
 	  		switch(this.data.myEnrolState){
 	  			case 'EnrollSuccess': return '我已报名,等待开赛'
+	  			case 'NeedAccount': return '等待分配账号'
 	  			case 'NeedExamine': return '等待审核资料'
 	  			case 'NeedTeam': return '待组队'
 	  			case 'NeedCrew': return '队友人数不够'
@@ -84,7 +78,14 @@
 	  methods: {
 	  	//完善资料
 	  	toAccountUpload(){
-	  		this.$router.push({name: 'OpenAccount', params: {type: 'upload'}})  		
+	  		let statu = localStorage.getItem('statu');
+	  		console.log(statu)
+	  		switch(statu){
+	  			case 'N': this.$router.push({path: '/survey'});break;
+					case 'W': this.$router.push({path: '/account/sign'});break;
+					case 'C': this.$router.push({path: '/account/upload'});break;
+					case 'E': this.$router.push({name: '/account/open'});break;					
+				} 		
 	  	}
 	  },
 	  components: {
@@ -142,15 +143,15 @@
 	}
 	.always{
 		position: absolute;
-		bottom: -22px;
-		right: -50px;
+		bottom: -44px;
+		right: -100px;
 		transform: rotate(-45deg);
 		background-color: #1E50AE;
 		color: #fff;
-		font-size: 12px;
+		font-size: 24px;
 		text-align: center;
 		line-height: 1.3;
-		padding: 4px 40px 40px;
+		padding: 8px 80px 80px;
 		z-index: 2;
 	}
 	.content{

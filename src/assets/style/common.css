@@ -30,6 +30,7 @@ input[type="search"]::-webkit-search-cancel-button{
 	height: 100%;
 	overflow-y: auto;
 	-webkit-overflow-scrolling: touch;
+	box-sizing: border-box;	
 }
 .sub-hidden #vux_view_box_body{
 	overflow: hidden !important;
@@ -70,7 +71,11 @@ input[type="search"]::-webkit-search-cancel-button{
 .menu-title {
   color: #888;
 }
-.warpper{
+.wrapper-content{
+	background-color: #fff;
+	padding: 15px;
+}
+.wrapper{
 	position: relative;
 	width: 100%;
 	height: 100%;

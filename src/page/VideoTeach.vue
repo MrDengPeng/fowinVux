@@ -39,7 +39,7 @@
 		activated(){
 			//滚动至上次的位置
 			this.$refs.viewBox.scrollTo(this.scrollTop || 0);
-		  	this.TITLE({title: '交易技巧'});
+		  	this.TITLE({title: '抱佛脚-有料'});
 		},
 		deactivated(){
 			//保存滚动位置
@@ -79,15 +79,10 @@
 			},
 			//搜索
 			onsubmit(){				
-				if(this.videoName.trim() != ''){
-					this.$refs.search.setBlur();
-					this.params.videoName = this.videoName.trim();
-					this.params.page = 1;
-					this.getData();
-				}else{
-					this.$vux.toast.text('请输入关键字查询', 'top')
-				}
-				
+				this.$refs.search.setBlur();
+				this.params.videoName = this.videoName.trim();
+				this.params.page = 1;
+				this.getData();				
 			},
 			//取消搜索并reset params
 			oncancel_M(){
@@ -101,7 +96,7 @@
 			},
 			//进入详情
 			toDetail(id){
-				this.TITLE({title: '视频详情'});
+				this.TITLE({title: '抱佛脚-有料(详情)'});
 				this.$router.push({name: 'VideoDetail', params: {id: id}})
 			}
 		}

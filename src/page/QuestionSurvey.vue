@@ -44,16 +44,21 @@
 				if(this.cur1.length > 0 && this.cur2.length > 0 && this.cur3.length > 0 && this.cur4.length > 0){
 					this.$post('/api/app/member/questionnaire.v1',{answer1: this.cur1.join(), answer2: this.cur2.join(), answer3: this.cur3.join(), answer4: this.cur4.join()}).then(
 						res => {
-							switch(res.examineState){
-								case 'W': this.$router.replace({path: '/account/sign'});break;
-								case 'C': this.$router.replace({path: '/account/upload'});break;
-								case 'E': this.$router.replace({path: '/account/open'});break;
-								default: 
-									this.$vux.toast.text('提交成功');
-									setTimeout(() => {
-										this.$router.go(-1);
-									}, 1000)
-							}
+							localStorage.setItem('statu',res.examineState);
+							this.$vux.alert.show({
+								title: '提交成功',
+								content: '您已完成问卷调查,填写资料即可报名成功',
+								buttonText: '马上去',
+								onHide: () => {
+									switch(res.examineState){
+										case 'W': this.$router.replace({path: '/account/sign'});break;
+										case 'C': this.$router.replace({path: '/account/upload'});break;
+										case 'E': this.$router.replace({path: '/account/open'});break;
+										default: this.$router.go(-1);break;
+									}
+								}
+							})
+							
 							
 						}
 					).catch(

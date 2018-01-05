@@ -37,8 +37,8 @@
 		},
 		activated(){
 			/*滚动到上次滚动的距离*/
-			this.$refs.viewBox.scrollTo(this.scrollTop || 0);
-		  	this.TITLE({title: '交易技巧'});
+			//this.$refs.viewBox.scrollTo(this.scrollTop || 0);
+		  	this.TITLE({title: '自习室-修炼'});
 		},
 		deactivated(){
 		  	/*保存滚动距离*/
@@ -77,19 +77,14 @@
 			},
 			//搜索
 			onsubmit(){
-				let keyword = this.keyword.trim()
-				if(keyword != ''){
-					this.$refs.search.setBlur();
-					this.params.skillName = keyword;
-					this.params.page = 1;
-					this.getData();
-				}else{
-					this.$vux.toast.text('请输入关键字查询', 'top')
-				}
+				this.$refs.search.setBlur();
+				this.params.skillName = this.keyword.trim();
+				this.params.page = 1;
+				this.getData();
 				
 			},
 			//取消搜索reset params
-			oncancel(){
+			oncancel_M(){
 				if(this.params.skillName != ''){
 					this.params.skillName = '';
 					this.params.page = 1;
@@ -99,7 +94,7 @@
 			},
 			//进入详情
 			toDetail(id){
-				this.TITLE({title: '技巧详情'});
+				this.TITLE({title: '自习室-修炼(详情)'});
 				this.$router.push({name: 'TradingDetail', params: {id: id}})
 			}
 		},

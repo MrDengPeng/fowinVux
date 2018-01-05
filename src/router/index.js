@@ -83,6 +83,11 @@ const routes = [
 	  path: '/survey',
 	  name: 'QuestionSurvey',
 	  component: (resolve) => { require(['@/page/QuestionSurvey'], resolve) }
+	},
+	{
+	  path: '/about',
+	  name: 'AboutHy',
+	  component: (resolve) => { require(['@/page/AboutHy'], resolve) }
 	}
 ]
 

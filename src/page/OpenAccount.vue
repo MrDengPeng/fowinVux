@@ -1,9 +1,9 @@
 <template>
-	<div class="wrap">
+	<div>
 		<div v-transfer-dom>
 			<x-dialog v-model="dialogShow" :dialog-style="{'border-radius': '5px'}">
 				<div class="dia-head">					
-					<x-icon type="ios-close-empty" size="30" class="close" @click.native="dialogShow = !dialogShow"></x-icon>
+					<x-icon type="ios-close-empty" size="30" class="close" @click.native="dialogBtn_M"></x-icon>
 					<img src="../assets/images/i_dialogTwo.png"/>
 				</div>
 				<div class="dia-body">
@@ -14,15 +14,13 @@
 			</x-dialog>
 		</div>
 		
-		<group v-if="type!='upload'" label-width="4.5em" label-margin-right="15px" style="color: #333;">
-			<popup-picker title="认证类型" v-model="attestType" :data="[['社会', '高校']]" value-text-align="left" />
+		<group class="account" v-if="type!='upload'" label-width="4.5em" label-margin-right="15px" style="color: #333;">
+			<popup-picker title="认证类型" v-model="attestType" :data="[['高校', '社会']]" value-text-align="left" />
 			<x-input title="真实姓名" v-model="realName" placeholder="请输入真实姓名" :max="5" :required="true" />
 			<x-input title="身份证" type="number" v-model="idcard" placeholder="请输入身份证号" :max="18" :required="true"/>
 			<x-input title="手机号" type="tel" is-type="china-mobile" v-model="telphone" placeholder="请输入手机号" :max="11" :required="true"/>
 			<x-input title="邮箱" type="email" is-type="email" v-model="email" placeholder="请输入邮箱" :max="26" :required="true" />
-			<!--<x-textarea :title="attestType[0]=='社会'?'地址':'详细信息'" v-if="attestType[0]=='社会'" v-model="address" :rows="2" :required="true" />-->
-			<popup-picker title="学校" v-if="attestType[0]!='社会'" v-model="school" :data="[['清华', '北大', '深大']]" value-text-align="left" />
-			<popup-picker title="年级" v-if="attestType[0]!='社会'" v-model="grade" :data="[['一年一班', '一年二班', '一年三班']]" value-text-align="left" />
+			<popup-picker title="学校/年级" v-if="attestType[0]!='社会'" v-model="curSchool" :columns="2" :data="schoolData" value-text-align="left" />
 			<x-input :title="attestType[0]!='社会'?'详细信息':'地址'" v-model="address" :placeholder="attestType[0]!='社会'?'如：金融2班':'请输入地址'" :max="20" :required="true" />
 		</group>
 		
@@ -30,15 +28,16 @@
 			<group-title>上传身份证</group-title>
 			<div class="photo-box">
 				<div>
-					<div class="photo-item ident one" @click="chooseImage_M">
-						
+					<div class="photo-item ident one" @click="chooseImage_M(1)">
+						<img class="img" v-if="cardImg1" :src="cardImg1"/>
 						<img class="bg-img" src="../assets/images/i_identbig.png"/>
 						<div class="camera"></div>
 					</div>
 					<p class="p1">身份证正面</p>
 				</div>
 				<div>
-					<div class="photo-item ident two">
+					<div class="photo-item ident two" @click="chooseImage_M(2)">
+						<img class="img" v-if="cardImg2" :src="cardImg2"/>
 						<img class="bg-img" src="../assets/images/i_identbig.png"/>
 						<div class="camera"></div>
 					</div>
@@ -48,13 +47,15 @@
 			<group-title>其他认证证明</group-title>
 			<div class="photo-box">
 				<div>
-					<div class="photo-item border">
+					<div class="photo-item" :class="{border: !cardImg3}" @click="chooseImage_M(3)">
+						<img class="img" v-if="cardImg3" :src="cardImg3"/>
 						<img class="bg-img" src="../assets/images/i_identbig.png"/>
 						<div class="camera"></div>
 					</div>
 				</div>
 				<div>
-					<div class="photo-item border">
+					<div class="photo-item" :class="{border: !cardImg4}" @click="chooseImage_M(4)">
+						<img class="img" v-if="cardImg4" :src="cardImg4"/>						
 						<img class="bg-img" src="../assets/images/i_identbig.png"/>
 						<div class="camera"></div>
 					</div>
@@ -66,7 +67,7 @@
 		
 		<div v-if="type!='upload'" class="protocol">
 			<check-icon :value.sync="checked" type="plain" class="check"></check-icon>
-			<p>我已阅读并同意接受TMC的<a href="../../static/file/Trademax-Group-Client-Agreement-1.pdf">《客户协议》</a>、<a href="../../static/file/Trademax-Financial-Services-Guide-2.pdf">《金融服务指南》</a>、<a href="../../static/file/Trademax-Privacy-Policy-3.pdf">《隐私条款》</a>、<a href="../../static/file/Trademax-Group-Product-Disclosure-Statement-4.pdf">《产品披露声明》</a>、<a href="../../static/file/Trademax-Group-Risk-Disclosure-5.pdf">《风险声明》</a>，并允许通过CRA进行身份信息验证。</p>
+			<p>我已阅读并同意接受TMC的<a href="/src/assets/file/Trademax-Financial-Services-Guide-2.pdf">《客户协议》</a>、<a href="/src/assets/file/Trademax-Financial-Services-Guide-2.pdf">《金融服务指南》</a>、<a href="/src/assets/file/Trademax-Privacy-Policy-3.pdf">《隐私条款》</a>、<a href="/src/assets/file/Trademax-Group-Product-Disclosure-Statement-4.pdf">《产品披露声明》</a>、<a href="/src/assets/file/Trademax-Group-Risk-Disclosure-5.pdf">《风险声明》</a>，并允许通过CRA进行身份信息验证。</p>
 		</div>
 		
 		<div class="g-b-btnbox">
@@ -85,44 +86,27 @@
 		data () {
 			return {
 				dialogShow: false,
-				attestType: ['社会'],
+				attestType: ['高校'],
 				realName: '',
 				idcard: '',
 				telphone: '',
 				email: '',
 				address: '',
-				school: ['清华'],
+				curSchool: [],
+				schoolData: [],
 				grade: ['一年一班'],
-				idcardFaceUrl: '../assets/images/img1.png',
-				idcardBackUrl: '../assets/images/img1.png',
 				info: '',
 				checked: false,
 				dialogTitle: '已提交，系统审核中',
 				dialogText: '开户成功会有消息提示，请耐心等待',
-				img1: '/assets/images/img1.png',
-				img2: '../assets/images/img1.png',
-				img3: '../assets/images/img1.png',
-				img4: '../assets/images/img1.png',
+				cardImg1: '',
+				cardImg2: '',
+				cardImg3: '',
+				cardImg4: '',
 			}
 		},
 		props: ['type'],
-		created(){
-			//配置微信SDK
-			this.$post('/api/weixin/checkSignAtion', {url: location.href}, {loading: false}).then(
-				res => {
-					if(typeof res === 'string'){
-						res = JSON.parse(res);
-					}
-					this.wx.config({
-					  debug: true, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
-					  appId: 'wxa7e231e937a1d596', // 必填，公众号的唯一标识
-					  timestamp: res.timestamp, // 必填，生成签名的时间戳
-					  nonceStr: res.noncestr, // 必填，生成签名的随机串
-					  signature: res.signature,// 必填，签名，见附录1
-					  jsApiList: ['chooseImage'] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
-					});
-				}
-			)
+		created(){						
 			//切换title
 			let title = ''
 			switch(this.type){
@@ -133,6 +117,28 @@
 			this.$store.commit('TITLE',{title: title})
 		},
 		mounted(){
+			//请求联动数据
+			this.$post('/api/app/member/findSchoolForSelect.v1',{}).then(
+				res => {
+					if(typeof res === 'string'){
+						res = JSON.parse(res)
+					}
+					let arr = []
+					for(let i = 0; i < res.length; i++){
+						let child = res[i].child
+						child.push('其他');
+						let parentObj = {parent: 0}
+						parentObj.name = parentObj.value = res[i].parent;
+						arr.push(parentObj);
+						for(let j = 0; j < child.length; j++){
+							let childObj = {parent: res[i].parent}
+							childObj.name = childObj.value = child[j];
+							arr.push(childObj);
+						}
+					}
+					this.schoolData = arr;
+				}
+			)
 			//切换弹窗text
 			if(this.type == 'sign'){
 				this.dialogTitle = '报名成功';
@@ -184,8 +190,12 @@
 					}
 					if(this.attestType[0] === '高校'){
 						params.attestType = 'G';
-						params.school = this.school[0];
-						params.grade = this.grade[0];
+						params.school = this.curSchool[0];
+						params.grade = this.curSchool[1];
+						if(!params.school){
+							this.$vux.toast.text('请选择您的学校');
+							return
+						}
 						if(params.address == ''){
 							this.$vux.toast.text('请填写您的详细信息');
 							return
@@ -200,24 +210,29 @@
 				
 				//开户参数
 				if(this.type === 'open'){
-					params.idcardFaceUrl = this.idcardFaceUrl;
-					params.idcardBackUrl = this.idcardBackUrl;
+					params.idcardFaceUrl = this.cardImg1;
+					params.idcardBackUrl = this.cardImg2;
+					params.materialUrl = this.cardImg3+','+this.cardImg4;
 				}
 				/*上传参数*/
 				if(this.type == 'upload'){
 					params = {
-						idcardFaceUrl: this.idcardFaceUrl,
-						idcardBackUrl: this.idcardBackUrl,
-						materialUrl: this.idcardBackUrl
+						idcardFaceUrl: this.cardImg1,
+						idcardBackUrl: this.cardImg2,
+						materialUrl: this.cardImg3+','+this.cardImg4
 					}
 				}
-				if(this.type == 'open' && this.type == 'upload'){
+				if(this.type == 'open' || this.type == 'upload'){
+					let text = ''
 					if(params.idcardFaceUrl == ''){
-						this.$vux.toast.text('请上传你的身份证正面');
-						return
+						text = '请上传您的身份证正面';
+					}else if(params.idcardBackUrl == ''){
+						text = '请上传您的身份证背面';
+					}else if(params.materialUrl == ','){
+						text = '请上传您的其他证明';
 					}
-					if(params.idcardBackUrl == ''){
-						this.$vux.toast.text('请上传你的身份证背面');
+					if(text != ''){
+						this.$vux.toast.text(text,'middle')
 						return
 					}
 				}
@@ -230,6 +245,7 @@
 //				return
 				this.$post('/api/app/member/update.v1', params).then(
 					res => {
+						localStorage.setItem('statu',res.examineState);
 						this.dialogShow = true; 
 					}
 				).catch(
@@ -248,14 +264,30 @@
 				}
 			},
 			//拍照
-			chooseImage_M(){
+			chooseImage_M(index){
 				this.wx.chooseImage({
 					count: 1, // 默认9
 					sizeType: ['original', 'compressed'], // 可以指定是原图还是压缩图，默认二者都有
 					sourceType: ['album', 'camera'], // 可以指定来源是相册还是相机，默认二者都有
 					success:  (res) => {						
 						var localIds = res.localIds; // 返回选定照片的本地ID列表，localId可以作为img标签的src属性显示图片
-						this.$refs.img1.src = localIds[0]
+						//window.wxjs_is_wkwebview
+						this.wx.getLocalImgData({
+							localId: localIds[0],
+							success: (res) => {
+								var pre = res.localData.split(',')[0].split(';')[0],     //上传的图片排除头部后的数据
+                    				result = pre.slice(11);
+                    				if(result == 'jgp'){
+                    					result = 'jpeg'
+                    				}
+                    			var base64 = res.localData.split(',')[1];//res.localData.replace(/jgp/,'jpeg')
+								this.$post('/api/file/uploadBase64Img.v1', {fileStr: base64, suffix: result}).then(
+									res => {
+										this['cardImg'+index] = res;
+									}
+								)								
+							}
+						})
 					}
 				});
 			}
@@ -274,11 +306,11 @@
 </script>
 
 <style lang="less">
-	.wrap .weui-cells{
+	.account .weui-cells{
 		font-size: 16px;
 		margin-top: 10px;
 	}
-	.vux-popup-picker-value.vux-cell-value{
+	.account .vux-popup-picker-value.vux-cell-value{
 		color: #333;
 	}
 </style>
@@ -324,6 +356,7 @@
 		left: 50%;
 		transform: translate(-50%, -50%);
 		z-index: 1;
+		min-height: 100%;
 	}
 	.photo-item .bg-img{
 		display: block;

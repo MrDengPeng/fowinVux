@@ -19,7 +19,7 @@
 			</div>
 			<div class="content">
 				<!--报名进度-->
-				<step-box :isTeam="data.isTeam" :myEnrollState="data.myEnrollState" />
+				<step-box :isTeam="data.isTeam" :myEnrollState="data.myEnrollState" :matchState="data.matchState" />
 				<p class="tip" v-if="data.isTeam=='Y'">提示：本次比赛中允许个人参赛，“组建小组”不是必要步骤。</p>
 			</div>
 		</div>
@@ -32,7 +32,7 @@
 			<user-ranking :data="{myNetworth:data.myNetworth,myProfit:data.myProfit,myRanking:data.myRanking,myAvatar:data.myAvatar}" :isTeam="data.isTeam" style="margin-top: 15px;padding-bottom: 15px;" />
 		</div>
 		
-		<div class="margin-bg" v-if="data.matchState=='InGame'&&data.weekRankList.length">
+		<div class="margin-bg" v-if="data.matchState=='InGame'&&data.weekRankList&&data.weekRankList.length">
 			<div class="top-head vux-1px-b">
 				<div class="left"><span class="icon i-cur"></span>周赛榜单</div>
 				<div class="right"><span class="more" @click="toRanking_M(data.weekRankId,'week')">查看更多</span></div>					
@@ -40,12 +40,12 @@
 			
 			<user-ranking v-if="data.isTeam=='Y'" :data="{myNetworth:data.myNetworth,myProfit:data.myProfit,myRanking:data.myRanking,myAvatar:data.myAvatar}" :isTeam="data.isTeam" style="margin-top: 15px;" />
 			
-			<top-three :topThree="data.weekRankList" style="padding-top: 15px; padding-bottom: 15px;" />
+			<top-three :topThree="data.weekRankList" style="padding-top: 15px;" />
 			
-			<table-fowin class="parent" :rankList="data.weekRankList" :page="1" />
+			<table-fowin class="parent" :rankList="data.weekRankList" :isTeam="data.isTeam" :page="1" style="margin-top: 15px;" />
 		</div>
 		
-		<div class="margin-bg" v-if="data.isAlways=='Y'&&data.seasonRankList">
+		<div class="margin-bg" v-if="data.isAlways=='Y'&&data.seasonRankList&&data.seasonRankList.length">
 			<div class="top-head vux-1px-b">
 				<div class="left"><span class="icon i-cur"></span>季赛榜单</div>
 				<div class="right"><span class="more" @click="toRanking_M(data.seasonRankId,'season')">查看更多</span></div>					
@@ -55,10 +55,10 @@
 			
 			<top-three :topThree="data.seasonRankList" style="padding-top: 15px; padding-bottom: 15px;" />
 			
-			<table-fowin class="parent" :rankList="data.seasonRankList" :page="1" />
+			<table-fowin class="parent" :rankList="data.seasonRankList" :isTeam="data.isTeam" :page="1" />
 		</div>
 		
-		<div class="margin-bg" v-if="data.matchState=='GameOver'&&data.weekRankList.length">
+		<div class="margin-bg" v-if="data.matchState=='GameOver'&&data.weekRankList&&data.weekRankList.length">
 			<div class="top-head vux-1px-b">
 				<div class="left"><span class="icon i-cur"></span>本次周赛前三甲</div>
 				<div class="right"><span class="more" @click="toRanking_M(data.weekRankId,'week')">查看更多</span></div>					
@@ -77,7 +77,7 @@
 			</div>
 		</div>
 		
-		<div class="margin-bg" v-if="data.matchState=='GameOver'&&data.seasonRankList">
+		<div class="margin-bg" v-if="data.matchState=='GameOver'&&data.seasonRankList&&data.seasonRankList.length">
 			<div class="top-head vux-1px-b">
 				<div class="left"><span class="icon i-cur"></span>本次季赛前三甲</div>
 				<div class="right"><span class="more" @click="toRanking_M(data.seasonRankId,'season')">查看更多</span></div>					
@@ -115,7 +115,7 @@
 							</div>
 							<div class="percent-box" :class="classobj">
 								<div class="line"></div>
-								<div class="percent vux-1px-b">盈亏比：{{data.profitLost}}%</div>								
+								<div class="percent vux-1px-b">盈亏比：{{profitLostNum_C}}%</div>								
 							</div>
 						</div>
 					</div>
@@ -131,27 +131,29 @@
 			</div>
 		</div>
 		
-		<div class="awards-chunk margin-bg" v-if="data.seasonPrize">
-			<div class="top-head vux-1px-b">
-				<div class="left"><span class="icon i-award"></span>季赛奖项设置</div>				
-			</div>
-			<div class="awards-list">
-				<div class="item one" v-for="(item,index) in data.seasonPrize" :class="{one:index==0,two:index==1,three:index==2,}">
-					<div>{{item.prizeName}}（{{item.prizeNum}}名） </div>
-					<div>{{item.award}}</div>
-				</div>
-			</div>
-		</div>
-		
 		<div class="awards-chunk margin-bg" v-if="data.weekPrize">
 			<div class="top-head vux-1px-b">
 				<div class="left"><span class="icon i-award"></span>周赛奖项设置</div>				
 			</div>
 			<div class="awards-list">
 				<div class="item one" v-for="(item,index) in data.weekPrize" :class="{one:index==0,two:index==1,three:index==2,}">
-					<div>{{item.prizeName}}（{{item.prizeNum}}名） </div>
+					<div>{{item.prizeName}}<span v-if="item.prizeNum!=0">（{{item.prizeNum}}名）</span></div>
 					<div>{{item.award}}</div>
 				</div>
+				<div class="award-tip" v-if="data.weekPrize[0].prizeNum==0">具体奖项见活动规则</div>
+			</div>
+		</div>
+		
+		<div class="awards-chunk margin-bg" v-if="data.seasonPrize">
+			<div class="top-head vux-1px-b">
+				<div class="left"><span class="icon i-award"></span>季赛奖项设置</div>				
+			</div>
+			<div class="awards-list">
+				<div class="item one" v-for="(item,index) in data.seasonPrize" :class="{one:index==0,two:index==1,three:index==2,}">
+					<div>{{item.prizeName}}<span v-if="item.prizeNum!=0">（{{item.prizeNum}}名）</span> </div>
+					<div>{{item.award}}</div>
+				</div>
+				<div class="award-tip" v-if="data.weekPrize[0].prizeNum==0">具体奖项见活动规则</div>
 			</div>
 		</div>
 		
@@ -169,7 +171,7 @@
 				<div class="left"><span class="icon i-sum"></span>赛事总结</div>				
 			</div>
 			<div class="content">
-				<p>1. 此处是赛事总结，可自定义编辑此处是赛事总结，可自定义编辑此处是赛事总结，可自定义编辑此处是赛事总结，可自定义编辑</p>
+				<p v-html="data.summary"></p>
 			</div>
 		</div>
 		
@@ -178,7 +180,7 @@
 				<div class="left"><span class="icon i-commun"></span>官方交流讨论群</div>				
 			</div>
 			<div class="content">
-				<div class="code"><img src="../assets/images/erweima.png"/></div>
+				<!--<div class="code"><img src="../assets/images/erweima.png"/></div>--> 
 				<p v-html="data.exchangeGroup"></p>
 			</div>
 		</div>
@@ -191,6 +193,7 @@
 	import UserRanking from '@/components/UserRanking'
 	import TableFowin from '@/components/TableFowin'
 	export default {
+		name: 'CollegeDetail',
 		data(){
 			return {
 				data: {},
@@ -200,82 +203,22 @@
 			}
 		},
 		props: ['id', 'type'],
-		components: {
-			Flexbox,
-			FlexboxItem,
-			TopThree,
-			UserRanking,
-			TableFowin,
-			//报名进度组件
-			'step-box': {				
-				data(){
-					return {
-						statu1: false,
-						statu2: false,
-						statu3: false,					
-					}
-				},
-				props: ['isTeam', 'myEnrollState'],
-				template: `<div class="step-box">
-					<div class="active">
-						<div class="statu"><span></span></div>					
-						<p>报名成功{{statu(myEnrollState)}}</p>
-					</div>
-					<div :class="{active: statu1}">
-						<div class="statu"><span></span></div>
-						<p>完善资料</p>
-					</div>
-					<div v-if="isTeam=='Y'" :class="{active: statu2}">
-						<div class="statu"><span></span></div>
-						<p>组建小组</p>
-					</div>
-					<div :class="{active: statu3}">
-						<div class="statu"><span></span></div>
-						<p>等待开赛</p>
-					</div>
-				</div>`,
-				methods: {
-					statu(myEnrollState){
-						switch(myEnrollState){
-							case 'ImproveInfo': 
-//								this.statu1 = true;
-								break;
-							case 'NeedTeam': 
-								this.statu1 = true;
-								break;
-							case 'EnrollSuccess': 
-								this.statu1 = this.statu2 = this.statu3 = true;
-								break;
-							default: 
-								this.statu1 = this.statu2 = this.statu3 = false;
-								break;
-						}
-					},
-//					statu2(){
-//						switch(this.matchState){
-//							case 'NeedTeam': return true
-//							case 'EnrollSuccess': return true
-//							default: return false
-//						}
-//					},
-//					statu3(){
-//						switch(this.matchState){
-//							case 'EnrollSuccess': return true
-//							default: return false
-//						}
-//					},
-				}
-			}
-		},
-		created(){
+		activated(){
 			this.$store.commit('TITLE',{title: '赛事详情'})
 			this.getData();
 		},
 		computed: {
+			profitLostNum_C(){
+				let profitLost = this.data.profitLost
+				if(typeof profitLost === 'string'){
+					profitLost = parseFloat(profitLost)
+				}
+				return profitLost*100
+			},
 			//盈亏率显示的位置计算
-			profitLost_C(){
-				let profitLost = this.data.profitLost || 50;
-				if(profitLost > 30){
+			profitLost_C(){	
+				let profitLost = this.profitLostNum_C
+				if(profitLost > 40){
 					this.classobj.one = true;
 					this.classobj.two = false;
 				}
@@ -323,10 +266,11 @@
 						let chartData = res.chartData
 						let chart = []
 						//是否有图表数据
-						if(chartData){
+						if(chartData && chartData != '[]'){
 							if(typeof chartData !== 'Object'){
 								chartData = JSON.parse(chartData)
 							}
+							let arrLabel = [] 
 							for(let i = 0; i < chartData.length; i++){
 								let obj = {
 				                	value: 335,
@@ -339,8 +283,9 @@
 								obj.value = chartData[i].propertyValue;
 								obj.itemStyle.normal.color = this.echartColor[i];
 								chart.push(obj)
-								this.echartLabel.push({propertyName: chartData[i].propertyName})
+								arrLabel.push({propertyName: chartData[i].propertyName})
 							}
+							this.echartLabel = this.echartLabel.splice(0,0).concat(arrLabel)
 							setTimeout(() => {
 								this.initEchart_M(chart);
 							}, 500)
@@ -383,18 +328,22 @@
 			//进入排行榜
 			toRanking_M(randId, historyType){
 				let rankType = this.data.isTeam == 'Y' ? 'group' : 'user'
-				let query = {matchId: this.data.id, rankId: randId, isAlways: this.data.isAlways, historyType: historyType}
+				let query = {matchId: this.data.id, rankId: randId, isAlways: this.data.isAlways, historyType: historyType, hisUser: 'T'}
+				if(this.type == '4' && this.data.isAlways == 'Y'){
+					query.hisUser = 'M'
+				}
 				this.$router.push({name: 'RankingAll', params: {rankType: rankType}, query: query})
 			},
 			//进入建组
 			toCreateTeam_M(id){
-				this.$router.push({name: 'CreateTeam', params:{id: id}})
+				this.$router.push({name: 'CreateTeam', params:{id: id, num: 0}})
 			},
 			//报名或分享
 			enrollShare_M(){
 				if(this.data.myEnrollState == 'NotEnroll'){
 					this.$post('/api/app/match/enrollMatch.v1', {matchId: this.id}).then(
 						res => {
+							localStorage.setItem('statu', res.memberState);
 							switch(res.memberState){
 								case 'N': this.$router.push({path: '/survey'});break;
 								case 'W': this.$router.push({path: '/account/sign'});break;
@@ -405,6 +354,7 @@
 									setTimeout(() => {
 										this.getData();
 									}, 1000)
+									break;
 							}
 							
 						}
@@ -413,13 +363,112 @@
 							console.log(e);
 						}
 					)
+				}else{
+					this.$vux.alert.show({
+						title: '提示',
+						content: '请点击页面右上角进行分享',
+						buttonText: '知道了'
+					})
 				}
 			}
-		}
+		},
+		components: {
+			Flexbox,
+			FlexboxItem,
+			TopThree,
+			UserRanking,
+			TableFowin,
+			//报名进度组件
+			'step-box': {				
+				data(){
+					return {
+						statu1: false,
+						statu2: false,
+						statu3: false,
+						statu4: false,
+						name: '完善资料'
+					}
+				},
+				props: ['isTeam', 'myEnrollState', 'matchState'],
+				template: `<div class="step-box">
+					<div class="active">
+						<div class="statu"><span></span></div>					
+						<p>已报名{{statu(myEnrollState)}}</p>
+					</div>
+					<div :class="{active: statu1}">
+						<div class="statu"><span></span></div>
+						<p>{{name}}</p>
+					</div>
+//					<div :class="{active: statu2}">
+//						<div class="statu"><span></span></div>
+//						<p>{{name}}</p>
+//					</div>
+					<div v-if="isTeam=='Y'" :class="{active: statu2}">
+						<div class="statu"><span></span></div>
+						<p>组建小组</p>
+					</div>
+					<div :class="{active: statu3}">
+						<div class="statu"><span></span></div>
+						<p>{{matchState=='Enrolling'?'等待开赛':'参加比赛'}}</p>
+					</div>
+				</div>`,
+				computed: {
+					
+				},
+				methods: {
+					statu(myEnrollState){
+						switch(myEnrollState){
+							case 'NeedAccount': 
+								this.name = '分配账号';
+								break;
+							case 'ImproveInfo': 
+								this.name = '完善资料';
+								break;							
+							case 'NeedExamine':
+								this.name = '审核资料';
+								break;
+							case 'NeedTeam': 
+								this.statu1 = true;
+								break;NeedCrew
+							case 'NeedCrew': 
+								this.statu1 = this.statu2 = true;
+								break;
+							case 'EnrollSuccess': 
+								this.name = '审核通过';
+								this.statu1 = this.statu2 = this.statu3 = true;
+								break;
+							default: 
+								this.statu1 = this.statu2 = this.statu3 = false;
+								break;
+						}
+					},
+//					statu2(){
+//						switch(this.matchState){
+//							case 'NeedTeam': return true
+//							case 'EnrollSuccess': return true
+//							default: return false
+//						}
+//					},
+//					statu3(){
+//						switch(this.matchState){
+//							case 'EnrollSuccess': return true
+//							default: return false
+//						}
+//					},
+				}
+			}
+		},
 	}
 </script>
 
 <style lang="less">
+	.award-tip{
+		text-align: 1.6;
+		font-size: 14px;
+		text-align: center;
+		color: #1E50AE;
+		margin-top: 10px;
+	}
 	.echart-label-box{
 		overflow: hidden;
 	}

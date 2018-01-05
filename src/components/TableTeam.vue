@@ -48,10 +48,10 @@
 				var arrow = this.$refs['arrow'+index][0];
 				var display = ele.style.display;	
 				if(display == 'none'){
-					arrow.style.transform = 'rotate3d(0, 0, 1, 0deg)';
+					arrow.style.transform = 'rotate3d(0, 0, 1, -180deg)';
 					ele.style.display = 'block';
 				}else{
-					arrow.style.transform = 'rotate3d(0, 0, 1, -180deg)';
+					arrow.style.transform = 'rotate3d(0, 0, 1, 0deg)';
 					ele.style.display = 'none';
 				}
 			}

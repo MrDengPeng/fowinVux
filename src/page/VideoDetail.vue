@@ -1,5 +1,6 @@
 <template>
-	<div class="wrap" v-html="data.videoUrl" ref="wrap">
+	<div>
+		<div class="wrap" v-html="data.videoUrl" ref="wrap"></div>
 	</div>
 </template>
 
